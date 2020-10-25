@@ -27,8 +27,8 @@ const Find = (params?:IParams):ISaidaVeiculos[] =>{
                 dataEntrada, 
             } = item; 
 
-            const motorista: IMotorista = db.Findbyid(item.idMotorista)
-            const veiculo : IVeiculo = db.Findbyid(item.idVeiculo)
+            const motorista: IMotorista = db.Findbyid(idMotorista)
+            const veiculo : IVeiculo = db.Findbyid(idVeiculo)
 
             items.push({
                 id, 

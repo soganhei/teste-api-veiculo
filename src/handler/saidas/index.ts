@@ -41,7 +41,7 @@ const Create = (req: Request, res: Response)=>{
 
         res.status(StatusCodes.BAD_REQUEST)
         res.send({
-            message: `Erro para cadastrar, entrada já realizada`
+            message: 'Entrada já realizada'
         }) 
         return 
     }
@@ -68,15 +68,15 @@ const Update = (req: Request, res: Response) =>{
 
 const Delete = (req: Request, res: Response) =>{
 
-    const idMotorista= parseInt(req.params.id)
+    const idSaida = parseInt(req.params.id)
    
-    const ok  = Services.SaidasServices.Delete(idMotorista)
+    const ok  = Services.SaidasServices.Delete(idSaida)
 
     if(!ok){
 
         res.status(StatusCodes.BAD_REQUEST)
         res.send({
-            message: `Erro para deletar motorista ${idMotorista}`
+            message: `Erro para deletar saída ${idSaida}`
         }) 
         return    
     }

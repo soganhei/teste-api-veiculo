@@ -36,14 +36,16 @@ const Create = (req: Request, res: Response)=>{
     if(isNome){
 
         res.status(StatusCodes.BAD_REQUEST)
-        res.send({
-            message: `Motorista ${payload.nome} já cadastrado!`
-        }) 
+
+        const message = `Motorista ${payload.nome} já cadastrado!`
+        
+         
+        res.send({ message }) 
         return
     }
 
     const item = Services.MotoristasServices.Create(payload)
-
+ 
     res.status(StatusCodes.CREATED)
     res.send(item)
     

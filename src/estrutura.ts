@@ -42,11 +42,12 @@ export interface IFormSaidaVeiculo{
 }
 
 export interface ILogs{
-    id:Number, 
-    key:String, 
-    method:String, 
-    error: Boolean, 
-    errorMessage: String, 
-    payload: any, 
-    dataCriacao: Date, 
+    id?:Number, 
+    key?:String, 
+    method?:String, 
+    error?: Boolean, 
+    errorMessage?: String, 
+    payload?: any, 
+    dataCriacao?: Date, 
+    table:String, 
 }
