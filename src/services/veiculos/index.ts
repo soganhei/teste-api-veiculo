@@ -10,9 +10,11 @@ interface IParams {
 
 import db from "../db"
 
+const KEY = "veiculos"
+
 const Find = (params?:IParams):IVeiculo[] =>{
 
-    const veiculos: IVeiculo[] = db.Find("veiculo")
+    const veiculos: IVeiculo[] = db.Find(KEY)
 
     const items: IVeiculo[] = []
 
@@ -63,10 +65,9 @@ const Create = (payload:IVeiculo):IVeiculo | null =>{
     payload.id = id
     payload.dataCriacao =  new Date()
   
-    payload.key = "veiculo"
+    payload.key = KEY
 
-    db.Create(payload)
-    return payload; 
+    return  db.Create(payload); 
     
 }
 
@@ -79,11 +80,9 @@ const Update = (payload:IVeiculo,idVeiculo:Number):IVeiculo | null =>{
         marca: payload.marca,
         cor: payload.cor, 
         placa: payload.placa,  
-    }
-    
-    
-    db.Update(idVeiculo, payload)
-    return payload;   
+    }   
+   
+    return  db.Update(idVeiculo, payload);   
 
 }
 
@@ -96,7 +95,7 @@ const Delete = (idVeiculo:Number):Boolean =>{
 
 const IsPlaca = (placa:String):Boolean =>{
     
-    const items: IVeiculo[] = db.Find("veiculo")
+    const items: IVeiculo[] = db.Find(KEY)
 
     const item = items.filter((item)=> {return item.placa == placa})
 

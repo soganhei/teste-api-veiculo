@@ -5,19 +5,19 @@ import {FormatDate,FormatDatePtBr} from '../../lib'
 
 import db from "../db"
 
+const KEY = 'saidas'
+
 const Find = ():ISaidaVeiculos[] =>{
 
-    const saidas: IFormSaidaVeiculo[] = db.Find("saidas")
+    const saidas: IFormSaidaVeiculo[] = db.Find(KEY)
 
     let items: ISaidaVeiculos[] = []
 
     saidas.forEach((item)=>{
 
-            const {
-                id, 
+            const {                
                 idMotorista, 
-                idVeiculo, 
-                dataCriacao, 
+                idVeiculo,                
                 dataSaida, 
                 dataEntrada, 
             } = item; 
@@ -26,12 +26,9 @@ const Find = ():ISaidaVeiculos[] =>{
             const veiculo : IVeiculo = db.Findbyid(idVeiculo)
 
             items.push({
-                id, 
+                ...item, 
                 motorista, 
-                veiculo, 
-                idMotorista, 
-                idVeiculo, 
-                dataCriacao, 
+                veiculo,                 
                 dataSaida: FormatDatePtBr(dataSaida), 
                 dataEntrada: FormatDatePtBr(dataEntrada), 
             })
@@ -62,10 +59,9 @@ const Create = (payload:IFormSaidaVeiculo):IFormSaidaVeiculo | null =>{
     payload.dataCriacao =  new Date()
     payload.dataSaida = FormatDate(new Date())
   
-    payload.key = "saidas"
-
-    db.Create(payload)
-    return payload; 
+    payload.key = KEY
+ 
+    return db.Create(payload); 
     
 }
 
@@ -77,9 +73,8 @@ const Update = (payload:IFormSaidaVeiculo,idMotorista:Number):IFormSaidaVeiculo 
         ...item, 
         dataEntrada: payload.dataEntrada,         
     }
-     
-    db.Update(idMotorista, payload)
-    return payload;   
+      
+    return db.Update(idMotorista, payload);   
 
 }
  
@@ -92,7 +87,7 @@ const Delete = (idMotorista:Number):Boolean =>{
 
 const IsItem = (column: keyof IFormSaidaVeiculo, value: any):Boolean =>{
 
-    const items: IFormSaidaVeiculo[] = db.Find("saidas")
+    const items: IFormSaidaVeiculo[] = db.Find(KEY)
 
     const item = items.filter((item)=> {return item[column] == value})
 

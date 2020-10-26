@@ -4,6 +4,10 @@
 
 > npm install
 
+## Rodar Tests
+
+> npm run test
+
 ## Iniciar aplicação
 
 > npm run dev `O servidor sera executado na port default 5000`

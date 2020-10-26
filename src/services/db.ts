@@ -2,7 +2,9 @@
 export let database = new Array()
 
 const Create = (value:any) =>{
+    
       database.push(value)
+      return value
 }
 
 const Find = (key:String):[] | any =>{
@@ -20,15 +22,18 @@ const Findbyid = (id:Number | any) =>{
     return database.filter((item)=> { return item.id === id })[0]   
 }
 
-const Update = (id:Number | any, value:any) =>{
+const Update = (id:Number | any, value:any): any | null =>{
+
+    let payload = {}
 
     database.forEach((item,idx) => {
 
         if(item.id == id){
             database[idx] = value
+            payload = database[idx]
         }
     }) 
-
+    return payload || null
 }
 
 const Delete = (id:Number | any) =>{

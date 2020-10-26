@@ -36,8 +36,7 @@ export interface IFormSaidaVeiculo{
     dataSaida: String, 
     dataEntrada: String, 
     motivoSaida: String, 
-    dataCriacao: Date, 
-    motorista: String, 
+    dataCriacao: Date,     
     key:String, 
 }
 
