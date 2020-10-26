@@ -11,30 +11,8 @@ app.use((req, res, next) => {
     next()
 })
 
-import Motoristas from './handler/motoristas'
-import Veiculos from './handler/veiculos'
-import Saidas from './handler/saidas'
-import Logs from './handler/logs'
-
-app.post("/motoristas",Motoristas.Create)
-app.get("/motoristas",Motoristas.Find)
-app.get("/motoristas/:id",Motoristas.FindByid)
-app.put("/motoristas/:id",Motoristas.Update)
-app.delete("/motoristas/:id",Motoristas.Delete)
-
-app.post("/veiculos",Veiculos.Create)
-app.get("/veiculos",Veiculos.Find)
-app.get("/veiculos/:id",Veiculos.FindByid)
-app.put("/veiculos/:id",Veiculos.Update)
-app.delete("/veiculos/:id",Veiculos.Delete)
-
-app.post("/saidas",Saidas.Create)
-app.get("/saidas",Saidas.Find)
-app.get("/saidas/:id",Saidas.FindByid)
-app.put("/saidas/:id",Saidas.Update)
-app.delete("/saidas/:id",Saidas.Delete)
-
-app.get("/logs",Logs.Find)
+import handlers from './handler'
+app.use(handlers)
 
 
 const port = process.env.PORT || 5000
