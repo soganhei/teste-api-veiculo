@@ -78,7 +78,7 @@ const IsNome = (nome:String):Boolean =>{
     
     const items: IMotorista[] = db.Find(key)
 
-    const item = items.filter((item)=> item.nome == nome)
+    const item = items.filter((item)=> {return item.nome == nome})
 
     if(item.length > 0){
         return true; 

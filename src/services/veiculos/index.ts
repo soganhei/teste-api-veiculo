@@ -98,7 +98,7 @@ const IsPlaca = (placa:String):Boolean =>{
     
     const items: IVeiculo[] = db.Find("veiculo")
 
-    const item = items.filter((item)=> item.placa == placa)
+    const item = items.filter((item)=> {return item.placa == placa})
 
     if(item.length > 0){
         return true; 

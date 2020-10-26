@@ -3,14 +3,9 @@ import {IMotorista, IVeiculo,ISaidaVeiculos,IFormSaidaVeiculo} from '../../estru
 
 import {FormatDate,FormatDatePtBr} from '../../lib'
 
-
-interface IParams {
-    nome?:String, 
-}
-
 import db from "../db"
 
-const Find = (params?:IParams):ISaidaVeiculos[] =>{
+const Find = ():ISaidaVeiculos[] =>{
 
     const saidas: IFormSaidaVeiculo[] = db.Find("saidas")
 
@@ -99,7 +94,7 @@ const IsItem = (column: keyof IFormSaidaVeiculo, value: any):Boolean =>{
 
     const items: IFormSaidaVeiculo[] = db.Find("saidas")
 
-    const item = items.filter((item)=> item[column] == value)
+    const item = items.filter((item)=> {return item[column] == value})
 
     if(item.length > 0){
         return true; 

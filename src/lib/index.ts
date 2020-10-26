@@ -4,6 +4,7 @@ export const FormatDate = (date:Date):String =>{
     return date.toJSON().slice(0,10)
 }
 
+//Entrada YYYY-MM-DD
 //Retorna DD/MM/YYYY
 export const FormatDatePtBr = (date:String):String =>{
 
