@@ -6,6 +6,7 @@ import { IFormSaidaVeiculo } from "../../estrutura";
 import Services from '../../services'
 
 import {FormatDate} from '../../lib'
+import { serialize } from "v8";
 
 const Find = (req: Request, res: Response)=>{
 
@@ -33,11 +34,14 @@ const Create = (req: Request, res: Response)=>{
 
     const date = FormatDate(new Date())
 
+    const isMotorista = Services.MotoristasServices.FindByid(payload.idMotorista)
+    const isVeiculo = Services.VeiculosServices.FindByid(payload.idVeiculo)
+
     const idMotorista = Services.SaidasServices.IsItem("idMotorista",payload.idMotorista)
     const idVeiculo = Services.SaidasServices.IsItem("idVeiculo",payload.idVeiculo)
     const dataSaida = Services.SaidasServices.IsItem("dataSaida",date)
 
-    if(!idMotorista && !idVeiculo){
+    if(!isMotorista && !isVeiculo){
 
         res.status(StatusCodes.BAD_REQUEST)
         res.send({
