@@ -33,7 +33,7 @@ describe("motoristas",()=>{
             expect(motorista).toEqual(itemMotorista)
 
        })
-       it("Atualiar motorista",()=>{
+       it("Atualizar motorista",()=>{
 
             const payload = {
                 ...motorista,

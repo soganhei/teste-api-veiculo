@@ -35,7 +35,7 @@ describe("veiculos",()=>{
             expect(veiculo).toEqual(itemVeiculo)
 
        })
-       it("Atualiar veiculo",()=>{
+       it("Atualizar veiculo",()=>{
 
             const payload = {
                 ...veiculo,

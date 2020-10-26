@@ -79,7 +79,7 @@ describe("saidas",()=>{
             expect(saida).toEqual(itemSaida)
 
        })
-       it("Atualiar saida",()=>{
+       it("Atualizar saida",()=>{
 
             const payload = {
                 ...saida,
