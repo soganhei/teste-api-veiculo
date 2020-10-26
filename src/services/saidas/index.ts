@@ -89,7 +89,7 @@ const IsItem = (column: keyof IFormSaidaVeiculo, value: any):Boolean =>{
 
     const items: IFormSaidaVeiculo[] = db.Find(KEY)
 
-    const item = items.filter((item)=> {return item[column] == value})
+    const item = items.filter((item)=> {return item[column] === value})
 
     if(item.length > 0){
         return true; 

@@ -1,17 +1,17 @@
-import { Request, Response } from "express";
+import {Request,Response} from 'express';
+
 import {StatusCodes} from 'http-status-codes';
-import { IFormSaidaVeiculo } from "../../estrutura";
+import {IFormSaidaVeiculo} from '../../estrutura'
 
 
-import Services from '../../services'
+import Services from '../../services/index';
 
-import {FormatDate} from '../../lib'
-import { serialize } from "v8";
+import {FormatDate} from '../../lib';
 
-const Find = (req: Request, res: Response)=>{
+
+const Find = (req:Request,res:Response)=>{
 
     const items = Services.SaidasServices.Find()
-    
     res.status(StatusCodes.OK)
     res.send(items)
 
@@ -70,7 +70,7 @@ const Update = (req: Request, res: Response) =>{
 
     const idMotorista= parseInt(req.params.id)
     
-    let payload: IFormSaidaVeiculo = req.body
+    const payload: IFormSaidaVeiculo = req.body
      
     const motorista = Services.SaidasServices.Update(payload, idMotorista)
 

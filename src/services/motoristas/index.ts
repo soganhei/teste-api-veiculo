@@ -21,7 +21,7 @@ const Find = (params?:IParams):IMotorista[] =>{
         const nome  = item.nome.toUpperCase()
         const pNome = `${params?.nome}`.toUpperCase()
 
-        if(nome.indexOf(pNome) != -1){
+        if(nome.indexOf(pNome) !== -1){
             items.push(item)
         }
 
@@ -75,7 +75,7 @@ const IsNome = (nome:String):Boolean =>{
     
     const items: IMotorista[] = db.Find(KEY)
 
-    const item = items.filter((item)=> {return item.nome == nome})
+    const item = items.filter((i)=> { return i.nome === nome })
 
     if(item.length > 0){
         return true; 

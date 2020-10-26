@@ -13,7 +13,7 @@ import db from "../db"
 const KEY = "veiculos"
 
 const Find = (params?:IParams):IVeiculo[] =>{
-
+    
     const veiculos: IVeiculo[] = db.Find(KEY)
 
     const items: IVeiculo[] = []
@@ -24,21 +24,21 @@ const Find = (params?:IParams):IVeiculo[] =>{
 
         const label = `${item.placa}|${item.marca}|${item.cor}`.toUpperCase()
         
-        if(params?.placa != undefined){
+        if(params?.placa !== undefined){
             search.push(params?.placa)
         }
 
-        if(params?.marca != undefined){
+        if(params?.marca !== undefined){
             search.push(params?.marca)
         }
 
-        if(params?.cor != undefined){
+        if(params?.cor !== undefined){
             search.push(params?.cor)
         }
 
         const s = search.join("|").toUpperCase()
         
-        if(label.indexOf(s) != -1){
+        if(label.indexOf(s) !== -1){
             items.push(item)
         }
 
@@ -97,7 +97,7 @@ const IsPlaca = (placa:String):Boolean =>{
     
     const items: IVeiculo[] = db.Find(KEY)
 
-    const item = items.filter((item)=> {return item.placa == placa})
+    const item = items.filter((item)=> {return item.placa === placa})
 
     if(item.length > 0){
         return true; 

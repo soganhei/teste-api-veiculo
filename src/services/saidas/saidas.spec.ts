@@ -93,8 +93,8 @@ describe("saidas",()=>{
        it("Deletar saida",()=>{
 
         db.Delete(3)
-        db.Delete(4)
-        db.Delete(5)
+        db.Delete(4) //Deletar motorista
+        db.Delete(5) //Deletar veículo
 
         const itemsMotorista = db.Find("test-motorista")
         expect([]).toEqual(itemsMotorista)

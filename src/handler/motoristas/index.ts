@@ -1,57 +1,55 @@
-import { Request, Response } from "express";
+import {Request,Response} from "express";
 import {StatusCodes} from 'http-status-codes';
-import { IMotorista } from "../../estrutura";
+import {IMotorista} from "../../estrutura";
 
 
 import Services from '../../services'
 
 
-const Find = (req: Request, res: Response)=>{
+const Find = async (req: Request, res: Response)=>{
 
     const query = req.query;
 
     const items = Services.MotoristasServices.Find(query)
-    
+         
     res.status(StatusCodes.OK)
     res.send(items)
 
 }
 
-const FindByid = (req: Request, res: Response) =>{
+const FindByid = async (req: Request, res: Response) =>{
 
     const idMotorista= parseInt(req.params.id)
 
     const item  = Services.MotoristasServices.FindByid(idMotorista)
 
-    res.status(StatusCodes.OK)
+    res.status(StatusCodes.OK)  
     res.send(item)
 
 }
 
-const Create = (req: Request, res: Response)=>{
+const Create = async (req: Request, res: Response)=>{
      
     const payload: IMotorista = req.body
-
+    
     const isNome = Services.MotoristasServices.IsNome(payload.nome)
     if(isNome){
 
         res.status(StatusCodes.BAD_REQUEST)
 
         const message = `Motorista ${payload.nome} já cadastrado!`
-        
-         
         res.send({ message }) 
         return
     }
 
     const item = Services.MotoristasServices.Create(payload)
  
-    res.status(StatusCodes.CREATED)
+    res.status(StatusCodes.CREATED)    
     res.send(item)
     
 }
 
-const Update = (req: Request, res: Response) =>{
+const Update = async (req: Request, res: Response) =>{
 
     const idMotorista= parseInt(req.params.id)
     
@@ -59,12 +57,12 @@ const Update = (req: Request, res: Response) =>{
      
     const motorista = Services.MotoristasServices.Update(payload, idMotorista)
 
-    res.status(StatusCodes.OK)
+    res.status(StatusCodes.OK)   
     res.send(motorista)
 
 }
 
-const Delete = (req: Request, res: Response) =>{
+const Delete = async (req: Request, res: Response) =>{
 
     const idMotorista= parseInt(req.params.id)
 

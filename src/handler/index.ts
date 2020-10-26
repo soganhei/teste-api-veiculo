@@ -1,6 +1,9 @@
-import express = require("express");
+import express = require("express")
+import * as bodyParser from "body-parser"
  
 const app = express();
+
+app.use(bodyParser.json());
 
 import Motoristas from './motoristas'
 import Veiculos from './veiculos'
