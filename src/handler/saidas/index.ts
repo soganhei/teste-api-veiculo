@@ -37,6 +37,15 @@ const Create = (req: Request, res: Response)=>{
     const idVeiculo = Services.SaidasServices.IsItem("idVeiculo",payload.idVeiculo)
     const dataSaida = Services.SaidasServices.IsItem("dataSaida",date)
 
+    if(!idMotorista && !idVeiculo){
+
+        res.status(StatusCodes.BAD_REQUEST)
+        res.send({
+            message: `Veículo ${payload.idVeiculo} e motorista ${payload.idMotorista} não encontrado`
+        }) 
+        return
+    }
+
     if(idMotorista && idVeiculo && dataSaida){
 
         res.status(StatusCodes.BAD_REQUEST)
