@@ -4,9 +4,15 @@
 
 > npm install
 
+## Iniciar aplicação
+
+> npm run dev `O servidor sera executado na port default 5000`
+
+> http://localhost:5000
+
 ## Motoristas
 
-> POST /veiculos `Criar um novo veículo`
+> POST /motoristas `Criar um novo motorista`
 ***
 > JSON envio
 ***
@@ -204,7 +210,7 @@ Status: 200
 Status: 204 
 ***
 
-## Saída de Veículo
+## Saídas de Veículos
 > POST /saidas `Criar um nova saída`
 ***
 > JSON envio
@@ -251,7 +257,7 @@ Status: 200
         "motivoSaida": "Viagem para SP",
         "dataSaida": "2020-10-26",
         "dataEntrada": "",
-        "dataCriacao": ,
+        "dataCriacao": "",
         "motorista":{
             "id":12346,
             "nome":"Marcus Antonio",
@@ -281,7 +287,7 @@ JSON responsta
         "motivoSaida": "Viagem para SP",
         "dataSaida": "2020-10-26",
         "dataEntrada": "",
-        "dataCriacao": ,
+        "dataCriacao": "",
         "motorista":{
             "id":12346,
             "nome":"Marcus Antonio",
