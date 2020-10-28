@@ -1,5 +1,5 @@
 
-import {IMotorista} from '../../estrutura'
+import {IMotorista} from '../../schema'
 import db from '../db'
 
 const motorista = {

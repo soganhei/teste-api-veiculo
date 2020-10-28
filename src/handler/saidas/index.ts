@@ -1,7 +1,7 @@
 import {Request,Response} from 'express';
 
 import {StatusCodes} from 'http-status-codes';
-import {IFormSaidaVeiculo} from '../../estrutura'
+import {IFormSaidaVeiculo} from '../../schema'
 
 
 import Services from '../../services/index';

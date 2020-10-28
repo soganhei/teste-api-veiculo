@@ -1,16 +1,37 @@
-import {Request,Response} from "express";
+import express,{Request,Response} from 'express';
 import {StatusCodes} from 'http-status-codes';
-import {IMotorista} from "../../estrutura";
 
 
-import Services from '../../services'
+import {IMotoristasServices,IMotoristas,ISaidasServices} from '../../schema'
+ 
+
+export interface IHandler {     
+    MotoristasServices:IMotoristasServices,
+    SaidasServices:ISaidasServices, 
+}
+
+let handler: IHandler
+
+const NewHandler = (h:IHandler)=>{
+
+    handler = h
+
+    const router  = express()
+    router
+        .post("/motoristas",Create)
+        .get("/motoristas",Find)
+        .get("/motoristas/:id",FindByid)
+        .put("/motoristas/:id",Update)
+        .delete("/motoristas/:id",Delete)
+    return router      
+}
 
 
 const Find = async (req: Request, res: Response)=>{
 
     const query = req.query;
 
-    const items = Services.MotoristasServices.Find(query)
+    const items = handler.MotoristasServices.Find(query)
          
     res.status(StatusCodes.OK)
     res.send(items)
@@ -21,7 +42,7 @@ const FindByid = async (req: Request, res: Response) =>{
 
     const idMotorista= parseInt(req.params.id)
 
-    const item  = Services.MotoristasServices.FindByid(idMotorista)
+    const item  = handler.MotoristasServices.FindByid(idMotorista)
 
     res.status(StatusCodes.OK)  
     res.send(item)
@@ -30,9 +51,9 @@ const FindByid = async (req: Request, res: Response) =>{
 
 const Create = async (req: Request, res: Response)=>{
      
-    const payload: IMotorista = req.body
+    const payload: IMotoristas = req.body
     
-    const isNome = Services.MotoristasServices.IsNome(payload.nome)
+    const isNome = handler.MotoristasServices.IsNome(payload.nome)
     if(isNome){
 
         res.status(StatusCodes.BAD_REQUEST)
@@ -42,10 +63,18 @@ const Create = async (req: Request, res: Response)=>{
         return
     }
 
-    const item = Services.MotoristasServices.Create(payload)
- 
+    const response = handler.MotoristasServices.Create(payload)
+    if(response instanceof Error){    
+
+        res.status(StatusCodes.BAD_REQUEST)
+
+        const message = `Error para cadastrar motorista ${payload.nome}`
+        res.send({ message }) 
+        return
+    }   
+     
     res.status(StatusCodes.CREATED)    
-    res.send(item)
+    res.send(response)  
     
 }
 
@@ -53,9 +82,9 @@ const Update = async (req: Request, res: Response) =>{
 
     const idMotorista= parseInt(req.params.id)
     
-    let payload: IMotorista = req.body
+    let payload: IMotoristas = req.body
      
-    const motorista = Services.MotoristasServices.Update(payload, idMotorista)
+    const motorista = handler.MotoristasServices.Update(payload, idMotorista)
 
     res.status(StatusCodes.OK)   
     res.send(motorista)
@@ -66,7 +95,7 @@ const Delete = async (req: Request, res: Response) =>{
 
     const idMotorista= parseInt(req.params.id)
 
-    const isSaisas = Services.SaidasServices.IsItem("idMotorista",idMotorista)
+    const isSaisas = handler.SaidasServices.ForenKey("idMotorista",idMotorista)
     if(isSaisas){
 
         res.status(StatusCodes.BAD_REQUEST)
@@ -76,9 +105,9 @@ const Delete = async (req: Request, res: Response) =>{
         return
     }
  
-    const ok  = Services.MotoristasServices.Delete(idMotorista)
+    const response = handler.MotoristasServices.Delete(idMotorista)
 
-    if(!ok){
+    if(response instanceof Error){
 
         res.status(StatusCodes.BAD_REQUEST)
         res.send({
@@ -92,11 +121,4 @@ const Delete = async (req: Request, res: Response) =>{
 
 }
 
-export default {
-    Find, 
-    Update, 
-    Create, 
-    Delete, 
-    FindByid, 
-
-}
+export default {NewHandler}

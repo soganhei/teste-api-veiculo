@@ -1,24 +1,23 @@
 
-import {IMotorista,IFormSaidaVeiculo} from '../../estrutura'
+import db from '../db'
 
- 
+import { IMotoristasServices, IMotoristas } from '../../schema'
+
 interface IParams {
-    nome?:String, 
+    nome?:String
 }
 
-import db from "../db"
+const KEY = 'motoristas'
 
-const KEY =  'motoristas'
+const Find = (params?:IParams):IMotoristas[] => {
 
-const Find = (params?:IParams):IMotorista[] =>{
- 
-    const motoristas: IMotorista[] = db.Find(KEY)
+    const motoristas: IMotoristas[] = db.Find(KEY)
 
-    let items: IMotorista[] = []
+    const items: IMotoristas[] = []
 
     motoristas.forEach((item) =>{
 
-        const nome  = item.nome.toUpperCase()
+        const nome = item.nome.toUpperCase()
         const pNome = `${params?.nome}`.toUpperCase()
 
         if(nome.indexOf(pNome) !== -1){
@@ -33,63 +32,68 @@ const Find = (params?:IParams):IMotorista[] =>{
     return motoristas 
 }
 
-const FindByid = (idMotorista:Number):IMotorista => {
+const FindByid = (id:Number):IMotoristas => {
 
-    let item: IMotorista  = db.Findbyid(idMotorista) 
-    return item; 
+    const item: IMotoristas = db.Findbyid(id)
+    return item
 
 }
 
-const Create = (payload:IMotorista):IMotorista | null =>{
-
+const Create = (payload:IMotoristas):IMotoristas | Error =>{
+ 
     const id = Math.floor(new Date().getTime() / 1000)
          
     payload.id = id
     payload.dataCriacao =  new Date()
   
     payload.key = KEY
-
-    return db.Create(payload); 
-    
-}
-
-const Update = (payload:IMotorista,idMotorista:Number):IMotorista | null =>{
-
-    const item: IMotorista = db.Findbyid(idMotorista)
-    
-    payload = {
-        ...item, 
-        nome: payload.nome, 
+ 
+    const response = db.Create(payload)
+    if(response instanceof Error){
+        return response
     }
-    return db.Update(idMotorista, payload)
+    return payload
+    
+}
+
+const Update = (payload:IMotoristas,id:Number): IMotoristas | Error =>{
+
+  const item: IMotoristas = db.Findbyid(id)
+  
+  payload = { ...item, nome: payload.nome }
+
+  const response = db.Update(id, payload)
+  
+  if(response instanceof Error){
+    return response
+  }
+  
+  return payload
 
 }
 
-const Delete = (idMotorista:Number):Boolean =>{
-                      
-    db.Delete(idMotorista)
-    return true; 
+const Delete = (idMotorista:Number): null | Error => {
+  return db.Delete(idMotorista)
 }
 
 const IsNome = (nome:String):Boolean =>{
     
-    const items: IMotorista[] = db.Find(KEY)
+    const motoristas: IMotoristas[] = db.Find(KEY)
 
-    const item = items.filter((i)=> { return i.nome === nome })
+    const items = motoristas.filter((item) => { return item.nome === nome })
 
-    if(item.length > 0){
-        return true; 
-    }
-    return false; 
+    if(items.length > 0) return true
+    
+    return false
 }
- 
 
-export default {
-    Find, 
-    Update, 
-    Create, 
-    Delete, 
-    FindByid,  
-    IsNome,    
-
+const services: IMotoristasServices = {
+  Find,
+  Update,
+  Create,
+  Delete,
+  FindByid,
+  IsNome
 }
+
+export default services

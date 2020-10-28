@@ -1,53 +1,79 @@
   
 export let database = new Array()
 
-const Create = (value:any) =>{
+const Create = (payload:any): null | Error =>{
+
+    const t = database.length
+    const n = database.push(payload)
     
-      database.push(value)
-      return value
+    if(n < t){
+        return new Error("Erro para criar novo registro")
+    }
+    return null
 }
 
-const Find = (key:String):[] | any =>{
+const Find = (key:String):[] =>{
     
      return  database.reduce((acc, item)=>{
 
-            if(item.key == key){
+            if(item.key === key){
                 acc.push(item)
             }
             return acc; 
      },[])
 }
 
-const Findbyid = (id:Number | any) =>{
-    return database.filter((item)=> { return item.id === id })[0]   
+const Findbyid = (id:Number): any | Error =>{
+
+    const index = findIndex(id)
+    if(index instanceof Error){
+        return index
+    }
+    return database[index]  
 }
 
-const Update = (id:Number | any, value:any): any | null =>{
+const Update = (id:Number | any, value:any):  null | Error =>{
 
-    let payload = {}
+    const index = findIndex(id)
+    if(index instanceof Error){
+        return index
+    }
+
+    database[index] = value
+    return null
+
+}
+
+const Delete = (id:Number): null | Error =>{
+
+    
+    const index = findIndex(id)
+    if(index instanceof Error){
+        return index
+    }
+            
+    delete database[index]
+    return null    
+
+}
+
+const findIndex = (id:Number): keyof[] | Error =>{
+
+    let index = 0
 
     database.forEach((item,idx) => {
 
-        if(item.id == id){
-            database[idx] = value
-            payload = database[idx]
+        if(item.id === id){
+            index = idx
+            return
         }
     }) 
-    return payload || null
-}
-
-const Delete = (id:Number | any) =>{
     
-    database = database.reduce((acc,item) => {
-
-        if(item.id != id){
-                acc.push(item)
-        }
-        return acc;        
-    },[]) 
-
+    if(index === 0 && database[index] === undefined){
+        return new Error(`Registro ${id} não encontrado`)
+    }
+    return index
 }
- 
 
 export default {
     Create, 

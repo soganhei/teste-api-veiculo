@@ -7,7 +7,7 @@ import app from '../'
 
 import Services from '../../services'
 
-import {IMotorista} from '../../estrutura'
+import {IMotorista} from '../../schema'
   
 describe('Api motoristas', ()=>{
 

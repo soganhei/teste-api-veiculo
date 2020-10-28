@@ -1,5 +1,5 @@
 
-import {IVeiculo} from '../../estrutura'
+import {IVeiculos} from '../../schema'
 import db from '../db'
 
 const veiculo = {
@@ -15,7 +15,7 @@ describe("veiculos",()=>{
 
        it("Criar novo veiculo",()=>{
 
-           const payload:IVeiculo = veiculo
+           const payload:IVeiculos = veiculo
 
            const novoVeiculo  = db.Create(payload)           
            expect(payload).toEqual(novoVeiculo)
@@ -23,7 +23,7 @@ describe("veiculos",()=>{
        })
        it("Listar veiculos",()=>{
             
-           const veiculos: IVeiculo[] = [veiculo]
+           const veiculos: IVeiculos[] = [veiculo]
 
            const items = db.Find("test-veiculo")
            expect(veiculos).toEqual(items)
@@ -31,7 +31,7 @@ describe("veiculos",()=>{
        })
        it("Listar veiculo byID",()=>{
 
-            const itemVeiculo: IVeiculo = db.Findbyid(2)
+            const itemVeiculo: IVeiculos = db.Findbyid(2)
             expect(veiculo).toEqual(itemVeiculo)
 
        })

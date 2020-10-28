@@ -1,19 +1,38 @@
-import { Request, Response } from "express";
+
+
+import express, { Request, Response } from 'express'
 import {StatusCodes} from 'http-status-codes';
+ 
 
+import {ILogsServices} from '../../schema'
 
-import Services from '../../services'
+export interface IHandler {     
+    LogsServices:ILogsServices,
+}
+
+let handler: IHandler
+
+const NewHandler = (h:IHandler)=>{
+
+    handler = h
+
+    const router  = express()
+    router
+    .get("/logs",Find)
+
+    return router      
+}
 
 
 const Find = (req: Request, res: Response)=>{
 
-    const items = Services.LogsServices.Find()
+    const items = handler.LogsServices.Find()
     
     res.status(StatusCodes.OK)
     res.send(items)
 
 }
 
-export default {
-    Find, 
+export default {    
+    NewHandler, 
 }

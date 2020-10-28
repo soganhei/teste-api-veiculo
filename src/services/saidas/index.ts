@@ -1,108 +1,105 @@
 
-import {IMotorista, IVeiculo,ISaidaVeiculos,IFormSaidaVeiculo} from '../../estrutura'
+import { IMotoristas, IVeiculos, ISaidas, ISaidasForm, ISaidasServices } from '../../schema'
 
-import {FormatDate,FormatDatePtBr} from '../../lib'
+import { FormatDate, FormatDatePtBr } from '../../lib'
 
-import db from "../db"
+import db from '../db'
 
 const KEY = 'saidas'
 
-const Find = ():ISaidaVeiculos[] =>{
+const Find = ():ISaidas[] => {
 
-    const saidas: IFormSaidaVeiculo[] = db.Find(KEY)
+    const saidas: ISaidasForm[] = db.Find(KEY)
 
-    let items: ISaidaVeiculos[] = []
+    const items: ISaidas[] = []
 
-    saidas.forEach((item)=>{
+    saidas.forEach((item) => {
 
-            const {                
-                idMotorista, 
-                idVeiculo,                
-                dataSaida, 
-                dataEntrada, 
-            } = item; 
+        const {
+            idMotorista,
+            idVeiculo,
+            dataSaida,
+            dataEntrada
+        } = item
 
-            const motorista: IMotorista = db.Findbyid(idMotorista)
-            const veiculo : IVeiculo = db.Findbyid(idVeiculo)
+        const motorista: IMotoristas = db.Findbyid(idMotorista)
+        const veiculo : IVeiculos = db.Findbyid(idVeiculo)
 
-            items.push({
-                ...item, 
-                motorista, 
-                veiculo,                 
-                dataSaida: FormatDatePtBr(dataSaida), 
-                dataEntrada: FormatDatePtBr(dataEntrada), 
-            })
+        items.push({
+        ...item,
+            veiculo,
+            motorista,
+            dataSaida: FormatDatePtBr(dataSaida),
+            dataEntrada: FormatDatePtBr(dataEntrada)
+        })
 
     })
-    return items; 
+    return items
 }
 
-const FindByid = (idSaida:Number):ISaidaVeiculos => {
+const FindByid = (id:Number):ISaidas => {
 
-    let item: ISaidaVeiculos  = db.Findbyid(idSaida) 
+    const item: ISaidas = db.Findbyid(id)
 
-    const motorista: IMotorista = db.Findbyid(item.idMotorista)
-    const veiculo : IVeiculo = db.Findbyid(item.idVeiculo)
+    const motorista: IMotoristas = db.Findbyid(item.idMotorista)
+    const veiculo : IVeiculos = db.Findbyid(item.idVeiculo)
 
-    item.motorista = motorista
-    item.veiculo= veiculo
-
-    return item; 
-
+    return { ...item, motorista, veiculo }
 }
 
-const Create = (payload:IFormSaidaVeiculo):IFormSaidaVeiculo | null =>{
+const Create = (payload:ISaidasForm):ISaidasForm | Error => {
 
     const id = Math.floor(new Date().getTime() / 1000)
          
     payload.id = id
-    payload.dataCriacao =  new Date()
+    payload.dataCriacao = new Date()
     payload.dataSaida = FormatDate(new Date())
   
     payload.key = KEY
  
-    return db.Create(payload); 
-    
+    const response = db.Create(payload)
+    if(response instanceof Error) {
+        return response
+    }
+    return payload
 }
 
-const Update = (payload:IFormSaidaVeiculo,idMotorista:Number):IFormSaidaVeiculo | null =>{
+const Update = (payload:ISaidasForm, id:Number):ISaidasForm | Error =>{
 
-    const item: IFormSaidaVeiculo = db.Findbyid(idMotorista)
+    const item: ISaidasForm = db.Findbyid(id)
         
-    payload = {
-        ...item, 
-        dataEntrada: payload.dataEntrada,         
+    payload = { ...item, dataEntrada: payload.dataEntrada }
+    const response = db.Update(id, payload)
+    if(response instanceof Error){
+        return response
     }
-      
-    return db.Update(idMotorista, payload);   
+    return payload
 
 }
  
-const Delete = (idMotorista:Number):Boolean =>{
-                      
-    db.Delete(idMotorista)
-    return true; 
-
+const Delete = (idMotorista:Number): null | Error => {
+    return  db.Delete(idMotorista)
 }
 
-const IsItem = (column: keyof IFormSaidaVeiculo, value: any):Boolean =>{
+const ForenKey = (key: keyof ISaidasForm, value: any):Boolean => {
 
-    const items: IFormSaidaVeiculo[] = db.Find(KEY)
+    const saidas: ISaidasForm[] = db.Find(KEY)
 
-    const item = items.filter((item)=> {return item[column] === value})
+    const items = saidas.filter((item) => { return item[key] === value })
 
-    if(item.length > 0){
-        return true; 
-    }
-    return false; 
+    if(items.length > 0) return true
+    
+    return false
 }
 
-export default {
+
+const services : ISaidasServices = {
     Find, 
     Update, 
     Create, 
     Delete, 
     FindByid, 
-    IsItem, 
-
+    ForenKey, 
 }
+
+export default services

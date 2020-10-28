@@ -1,4 +1,4 @@
-import {ILogs} from '../../estrutura'
+import {ILogs,ILogsServices} from '../../schema'
  
 interface IParams {
     nome?:String, 
@@ -6,28 +6,15 @@ interface IParams {
 
 import db from "../db"
 
-const key =  'logs'
+const key =  'logs' 
 
-const Find = (params?:IParams):ILogs[] =>{
-
+const Find = ():ILogs[] =>{
+ 
     const items: [] = db.Find(key)
     return items; 
 }
 
-const Create = (payload:ILogs) =>{
-
-    const id = Math.floor(new Date().getTime() / 1000)
-         
-    payload.id = id
-    payload.dataCriacao =  new Date()
-  
-    payload.key = key
-
-    db.Create(payload)
-
+const services: ILogsServices = {
+    Find,
 }
-
-export default {
-    Find, 
-    Create, 
-}
+export default services

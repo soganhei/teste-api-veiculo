@@ -1,46 +1,45 @@
 
-import {IVeiculo,IFormSaidaVeiculo} from '../../estrutura'
+import db from '../db'
+import { IVeiculos, IVeiculosServices } from '../../schema'
 
  
 interface IParams {
-    placa?:String, 
-    marca?:String, 
-    cor?:String, 
+    placa?:String,
+    marca?:String,
+    cor?:String
 }
 
-import db from "../db"
+const KEY = 'veiculos'
 
-const KEY = "veiculos"
-
-const Find = (params?:IParams):IVeiculo[] =>{
+const Find = (params?:IParams):IVeiculos[] => {
     
-    const veiculos: IVeiculo[] = db.Find(KEY)
+    const veiculos: IVeiculos[] = db.Find(KEY)
 
-    const items: IVeiculo[] = []
+    const items: IVeiculos[] = []
 
-    veiculos.forEach(item=>{
+    veiculos.forEach(item => {
 
-        let search = []
+    const search = []
 
-        const label = `${item.placa}|${item.marca}|${item.cor}`.toUpperCase()
-        
-        if(params?.placa !== undefined){
-            search.push(params?.placa)
-        }
+    const label = `${item.placa}|${item.marca}|${item.cor}`.toUpperCase()
+    
+    if(params?.placa !== undefined){
+        search.push(params?.placa)
+    }
 
-        if(params?.marca !== undefined){
-            search.push(params?.marca)
-        }
+    if(params?.marca !== undefined){
+        search.push(params?.marca)
+    }
 
-        if(params?.cor !== undefined){
-            search.push(params?.cor)
-        }
+    if(params?.cor !== undefined){
+        search.push(params?.cor)
+    }
 
-        const s = search.join("|").toUpperCase()
-        
-        if(label.indexOf(s) !== -1){
-            items.push(item)
-        }
+    const s = search.join('|').toUpperCase()
+    
+    if(label.indexOf(s) !== -1){
+        items.push(item)
+    }
 
     })
 
@@ -48,71 +47,73 @@ const Find = (params?:IParams):IVeiculo[] =>{
         return items
     }
 
-    return veiculos; 
+    return veiculos 
 }
 
-const FindByid = (idVeiculo:Number):IVeiculo => {
+const FindByid = (idVeiculo:Number):IVeiculos => {
 
-    let item: IVeiculo  = db.Findbyid(idVeiculo) 
-    return item; 
+    const item: IVeiculos = db.Findbyid(idVeiculo)
+    return item
 
 }
 
-const Create = (payload:IVeiculo):IVeiculo | null =>{
-
+const Create = (payload:IVeiculos):IVeiculos | Error =>{
+ 
     const id = Math.floor(new Date().getTime() / 1000)
          
     payload.id = id
-    payload.dataCriacao =  new Date()
+    payload.dataCriacao = new Date()
   
     payload.key = KEY
 
-    return  db.Create(payload); 
-    
+    const response = db.Create(payload)
+    if(response instanceof Error){
+        return response
+    }
+
+    return payload
 }
 
-const Update = (payload:IVeiculo,idVeiculo:Number):IVeiculo | null =>{
+const Update = (payload:IVeiculos, id:Number):IVeiculos | Error => {
 
-    const item: IVeiculo = db.Findbyid(idVeiculo)
+    const item: IVeiculos = db.Findbyid(id)
     
     payload = {
         ...item, 
         marca: payload.marca,
         cor: payload.cor, 
         placa: payload.placa,  
-    }   
-   
-    return  db.Update(idVeiculo, payload);   
+    }      
+    const response = db.Update(id, payload)   
+    if(response instanceof Error){
+        return response
+    }
+    return payload
 
 }
 
-const Delete = (idVeiculo:Number):Boolean =>{
-                      
-    db.Delete(idVeiculo)
-    return true; 
-
+const Delete = (idVeiculo:Number): null | Error => {
+    return db.Delete(idVeiculo)
 }
 
 const IsPlaca = (placa:String):Boolean =>{
     
-    const items: IVeiculo[] = db.Find(KEY)
+    const veiculos: IVeiculos[] = db.Find(KEY)
 
-    const item = items.filter((item)=> {return item.placa === placa})
+    const items = veiculos.filter((item) => { return item.placa === placa })
 
-    if(item.length > 0){
-        return true; 
-    }
-    return false; 
+    if(items.length > 0) return true
+    
+    return false 
 }
 
 
-export default {
+const services: IVeiculosServices = {
     Find, 
     Update, 
     Create, 
     Delete, 
-    FindByid, 
-    IsPlaca, 
-    
-
+    FindByid,
 }
+
+export default services

@@ -1,5 +1,5 @@
 
-import {IFormSaidaVeiculo,ISaidaVeiculos,IMotorista,IVeiculo} from '../../estrutura'
+import {IFormSaidaVeiculo,ISaidaVeiculos,IMotorista,IVeiculo} from '../../schema'
 import db from '../db'
 
 const motorista = {
