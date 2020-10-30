@@ -1,19 +1,23 @@
 
-import { IMotoristas, IVeiculos, ISaidas, ISaidasForm, ISaidasServices } from '../../schema'
-
-import { FormatDate, FormatDatePtBr } from '../../lib'
-
 import db from '../db'
 
+import { IMotoristas, IVeiculos, ISaidas, ISaidasForm, ISaidasServices } from '../../schemas'
+import { FormatDate, FormatDatePtBr } from '../../lib'
+
+import errors from './errors'
+
+import MotoristasServices from '../motoristas'
+import VeiculosServices from '../veiculos'
+ 
 const KEY = 'saidas'
 
-const Find = ():ISaidas[] => {
+const Find = async (): Promise<ISaidas[]> => {
 
-    const saidas: ISaidasForm[] = db.Find(KEY)
+    const saidas: ISaidasForm[] = await db.Find(KEY)
+    
+    let items: ISaidas[] = []
 
-    const items: ISaidas[] = []
-
-    saidas.forEach((item) => {
+    for(const item of saidas){
 
         const {
             idMotorista,
@@ -22,32 +26,49 @@ const Find = ():ISaidas[] => {
             dataEntrada
         } = item
 
-        const motorista: IMotoristas = db.Findbyid(idMotorista)
-        const veiculo : IVeiculos = db.Findbyid(idVeiculo)
+        const motorista = await db.Findbyid(idMotorista)
+        const veiculo   = await db.Findbyid(idVeiculo)
 
-        items.push({
-        ...item,
+        const data = {
+            ...item,
             veiculo,
             motorista,
             dataSaida: FormatDatePtBr(dataSaida),
             dataEntrada: FormatDatePtBr(dataEntrada)
-        })
-
-    })
+        }
+        items.push(data)
+    }  
     return items
 }
 
-const FindByid = (id:Number):ISaidas => {
+const FindByid = async (id:number): Promise<ISaidas> => {
 
-    const item: ISaidas = db.Findbyid(id)
+    const item: ISaidas = await db.Findbyid(id)
 
-    const motorista: IMotoristas = db.Findbyid(item.idMotorista)
-    const veiculo : IVeiculos = db.Findbyid(item.idVeiculo)
+    const motorista: IMotoristas = await db.Findbyid(item.idMotorista)
+    const veiculo : IVeiculos = await db.Findbyid(item.idVeiculo)
 
     return { ...item, motorista, veiculo }
 }
 
-const Create = (payload:ISaidasForm):ISaidasForm | Error => {
+const Create = async (payload:ISaidasForm): Promise<ISaidasForm> => {
+
+    const isMotorista = await MotoristasServices.FindByid(payload.idMotorista)
+    const isVeiculo   = await VeiculosServices.FindByid(payload.idVeiculo)
+
+    if(!isMotorista && !isVeiculo){
+        throw errors.ErrorVMNaoCadastrado
+    }
+
+    const date = FormatDate(new Date())
+
+    const idMotorista = await ForenKey('idMotorista',payload.idMotorista)
+    const idVeiculo   = await ForenKey('idVeiculo',payload.idVeiculo)
+    const dataSaida   = await ForenKey('dataSaida',date)
+
+    if(idMotorista && idVeiculo && dataSaida){
+        throw errors.ErrorSaidaCadastrada
+    }
 
     const id = Math.floor(new Date().getTime() / 1000)
          
@@ -57,33 +78,40 @@ const Create = (payload:ISaidasForm):ISaidasForm | Error => {
   
     payload.key = KEY
  
-    const response = db.Create(payload)
+    const response = await db.Create(payload)
     if(response instanceof Error) {
-        return response
+        throw errors.ErrorCadastrarSaida
+        
     }
     return payload
 }
 
-const Update = (payload:ISaidasForm, id:Number):ISaidasForm | Error =>{
+const Update = async (payload:ISaidasForm, id:number): Promise<ISaidasForm> =>{
 
-    const item: ISaidasForm = db.Findbyid(id)
+    const item: ISaidasForm = await db.Findbyid(id)
         
     payload = { ...item, dataEntrada: payload.dataEntrada }
-    const response = db.Update(id, payload)
+    
+    const response = await db.Update(id, payload)     
     if(response instanceof Error){
-        return response
+        throw errors.ErrorCadastrarSaida
     }
     return payload
 
 }
  
-const Delete = (idMotorista:Number): null | Error => {
-    return  db.Delete(idMotorista)
+const Delete = async (idMotorista:number): Promise<void> => {
+    
+    const response =  await db.Delete(idMotorista)
+     if(response instanceof Error){
+        throw errors.ErrorDeletarSaida
+    }
+      
 }
 
-const ForenKey = (key: keyof ISaidasForm, value: any):Boolean => {
+const ForenKey = async (key: keyof ISaidasForm, value: any): Promise<boolean> => {
 
-    const saidas: ISaidasForm[] = db.Find(KEY)
+    const saidas: ISaidasForm[] = await db.Find(KEY)
 
     const items = saidas.filter((item) => { return item[key] === value })
 

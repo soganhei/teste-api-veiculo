@@ -1,15 +1,13 @@
 
 
-import Motoristas from './motoristas'
-import Veiculos from './veiculos'
-import Saidas from './saidas'
-import Logs from './logs'
-
-const Services = {
-    MotoristasServices:Motoristas, 
-    VeiculosServices: Veiculos, 
-    SaidasServices: Saidas, 
-    LogsServices: Logs, 
-}
-
-export default  Services
+import MotoristasServices from './motoristas'
+import VeiculosServices from './veiculos'
+import SaidasServices from './saidas'
+ 
+const services = {
+    MotoristasServices, 
+    VeiculosServices, 
+    SaidasServices,  
+} 
+ 
+export default services

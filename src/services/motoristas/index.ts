@@ -1,45 +1,56 @@
 
 import db from '../db'
 
-import { IMotoristasServices, IMotoristas } from '../../schema'
+import { IMotoristasServices, IMotoristas } from '../../schemas'
+import SaidasServices from '../saidas'
+
+import errors from './errors'
 
 interface IParams {
-    nome?:String
+    nome?:string
 }
 
 const KEY = 'motoristas'
+ 
 
-const Find = (params?:IParams):IMotoristas[] => {
+const Find = async (params?:IParams): Promise<IMotoristas[]> => {
 
-    const motoristas: IMotoristas[] = db.Find(KEY)
+    const motoristas: IMotoristas[] = await db.Find(KEY)
 
     const items: IMotoristas[] = []
 
     motoristas.forEach((item) =>{
 
-        const nome = item.nome.toUpperCase()
+        const nome  = item.nome.toUpperCase()
         const pNome = `${params?.nome}`.toUpperCase()
 
         if(nome.indexOf(pNome) !== -1){
             items.push(item)
-        }
-
+        } 
     })
 
-    if(items.length > 0){
-        return items
-    }
+    if(items.length > 0) return items
+
     return motoristas 
 }
 
-const FindByid = (id:Number):IMotoristas => {
+const FindByid = async (id:number): Promise<IMotoristas> => {
 
-    const item: IMotoristas = db.Findbyid(id)
+    const response = await db.Findbyid(id)
+    if(response instanceof Error){
+        throw errors.ErrorListarMotorista
+    }
+
+    const item: IMotoristas = response
     return item
-
 }
 
-const Create = (payload:IMotoristas):IMotoristas | Error =>{
+const Create = async (payload:IMotoristas): Promise<IMotoristas> =>{
+
+    const isNome = await IsNome(payload.nome)
+    if(isNome){
+        throw  errors.ErrorMotoristaCadastrado    
+    }
  
     const id = Math.floor(new Date().getTime() / 1000)
          
@@ -48,42 +59,53 @@ const Create = (payload:IMotoristas):IMotoristas | Error =>{
   
     payload.key = KEY
  
-    const response = db.Create(payload)
+    const response = await db.Create(payload)
     if(response instanceof Error){
-        return response
+        throw  errors.ErrorCadastrarMotorista    
     }
     return payload
     
 }
 
-const Update = (payload:IMotoristas,id:Number): IMotoristas | Error =>{
+const Update = async (payload:IMotoristas,id:number): Promise<IMotoristas> =>{
 
-  const item: IMotoristas = db.Findbyid(id)
+  const item: IMotoristas = await db.Findbyid(id)
   
   payload = { ...item, nome: payload.nome }
 
-  const response = db.Update(id, payload)
-  
+  const response =  await db.Update(id, payload)
   if(response instanceof Error){
-    return response
+    throw errors.ErrorAtualizarMotorista
   }
-  
+
   return payload
 
 }
 
-const Delete = (idMotorista:Number): null | Error => {
-  return db.Delete(idMotorista)
+const Delete = async (idMotorista:number): Promise<void> => {
+
+    const isMotorista = SaidasServices.ForenKey('idMotorista', idMotorista)
+    if(isMotorista){
+        throw errors.ErrorMotoristaRelacionado
+    }
+
+    const response = await db.Delete(idMotorista)
+    if(response instanceof Error){
+        throw errors.ErrorDeletarMotorista
+    }
+     
 }
 
-const IsNome = (nome:String):Boolean =>{
+const IsNome = async (nome:string): Promise<boolean> =>{
     
-    const motoristas: IMotoristas[] = db.Find(KEY)
+    const motoristas: IMotoristas[] = await db.Find(KEY)
 
-    const items = motoristas.filter((item) => { return item.nome === nome })
+    const items = motoristas.filter(({ nome }) => nome)
 
-    if(items.length > 0) return true
-    
+     
+    if(items.length > 0){
+        return true
+    }    
     return false
 }
 

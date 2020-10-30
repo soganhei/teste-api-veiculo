@@ -1,21 +1,17 @@
 import express = require("express")
-import * as bodyParser from "body-parser"
- 
+  
 const app = express();
 
-app.use(bodyParser.json());
+app.disable('x-powered-by');
+app.use(express.json());
 
 import Services from '../services'
 
 import Motoristas from './motoristas'
-//import Veiculos from './veiculos'
-//import Saidas from './saidas'
-import Logs from './logs'
+import Veiculos from './veiculos'
+import Saidas from './saidas'
+  
  
-const logs = Logs.NewHandler({
-    LogsServices:Services.LogsServices,     
-})
-app.use(logs)
 
 const motoristas = Motoristas.NewHandler({
     MotoristasServices:Services.MotoristasServices, 
@@ -23,19 +19,16 @@ const motoristas = Motoristas.NewHandler({
 })
 app.use(motoristas)
 
- 
+const veiculos = Veiculos.NewHandler({
+    VeiculosServices:Services.VeiculosServices,  
+})
+app.use(veiculos)
 
-/**app.post("/veiculos",Veiculos.Create)
-app.get("/veiculos",Veiculos.Find)
-app.get("/veiculos/:id",Veiculos.FindByid)
-app.put("/veiculos/:id",Veiculos.Update)
-app.delete("/veiculos/:id",Veiculos.Delete)
-
-app.post("/saidas",Saidas.Create)
-app.get("/saidas",Saidas.Find)
-app.get("/saidas/:id",Saidas.FindByid)
-app.put("/saidas/:id",Saidas.Update)
-app.delete("/saidas/:id",Saidas.Delete) */
-
- 
+const saidas = Saidas.NewHandler({
+    SaidasServices: Services.SaidasServices,
+    VeiculosServices:Services.VeiculosServices, 
+    MotoristasServices:Services.MotoristasServices, 
+})
+app.use(saidas)
+  
 export default app

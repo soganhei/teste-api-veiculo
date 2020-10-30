@@ -1,19 +1,22 @@
 
 import db from '../db'
-import { IVeiculos, IVeiculosServices } from '../../schema'
+import { IVeiculos, IVeiculosServices } from '../../schemas'
+import SaidasServices from '../saidas'
 
+import errors from './errors'
+  
  
 interface IParams {
-    placa?:String,
-    marca?:String,
-    cor?:String
+    placa?:string,
+    marca?:string,
+    cor?:string
 }
 
 const KEY = 'veiculos'
 
-const Find = (params?:IParams):IVeiculos[] => {
+const Find = async (params?:IParams): Promise<IVeiculos[]> => {
     
-    const veiculos: IVeiculos[] = db.Find(KEY)
+    const veiculos: IVeiculos[] = await db.Find(KEY)
 
     const items: IVeiculos[] = []
 
@@ -50,14 +53,24 @@ const Find = (params?:IParams):IVeiculos[] => {
     return veiculos 
 }
 
-const FindByid = (idVeiculo:Number):IVeiculos => {
+const FindByid = async (id:number): Promise<IVeiculos> => {
 
-    const item: IVeiculos = db.Findbyid(idVeiculo)
+    const response = await db.Findbyid(id)
+    if(response instanceof Error){
+        throw errors.ErrorListarVeiculo
+    }
+
+    const item: IVeiculos = await response
     return item
 
 }
 
-const Create = (payload:IVeiculos):IVeiculos | Error =>{
+const Create = async (payload:IVeiculos): Promise<IVeiculos> =>{
+
+    const isPlaca = IsPlaca(payload.placa)
+    if(!isPlaca){
+        throw errors.ErrorVeiculoCadastrado
+    }
  
     const id = Math.floor(new Date().getTime() / 1000)
          
@@ -66,17 +79,17 @@ const Create = (payload:IVeiculos):IVeiculos | Error =>{
   
     payload.key = KEY
 
-    const response = db.Create(payload)
+    const response = await db.Create(payload)
     if(response instanceof Error){
-        return response
+         throw errors.ErrorCadastrarVeiculo
     }
 
     return payload
 }
 
-const Update = (payload:IVeiculos, id:Number):IVeiculos | Error => {
+const Update = async (payload:IVeiculos, id:number): Promise<IVeiculos> => {
 
-    const item: IVeiculos = db.Findbyid(id)
+    const item: IVeiculos = await db.Findbyid(id)
     
     payload = {
         ...item, 
@@ -84,26 +97,37 @@ const Update = (payload:IVeiculos, id:Number):IVeiculos | Error => {
         cor: payload.cor, 
         placa: payload.placa,  
     }      
-    const response = db.Update(id, payload)   
-    if(response instanceof Error){
-        return response
-    }
+    const response = await db.Update(id, payload)   
+    if(response instanceof Error){ 
+            throw errors.ErrorAtualizarVeiculo 
+    }   
     return payload
 
 }
 
-const Delete = (idVeiculo:Number): null | Error => {
-    return db.Delete(idVeiculo)
+const Delete = async (idVeiculo:number): Promise<void> => {
+
+    const isPlaca = SaidasServices.ForenKey('idVeiculo', idVeiculo)
+    if(isPlaca){
+        throw errors.ErrorVeiculoRelacionado
+    }
+     
+    const response = await db.Delete(idVeiculo)
+    if(response instanceof Error){
+        throw errors.ErrorDeletarVeiculo 
+    } 
+
 }
 
-const IsPlaca = (placa:String):Boolean =>{
+const IsPlaca = async (placa:string): Promise<boolean> =>{
     
-    const veiculos: IVeiculos[] = db.Find(KEY)
+    const veiculos: IVeiculos[] = await db.Find(KEY)
 
-    const items = veiculos.filter((item) => { return item.placa === placa })
+    const items = veiculos.filter(({ placa }) => placa)
 
-    if(items.length > 0) return true
-    
+    if(items.length > 0) {
+        return true
+    }    
     return false 
 }
 
@@ -114,6 +138,7 @@ const services: IVeiculosServices = {
     Create, 
     Delete, 
     FindByid,
+    IsPlaca, 
 }
 
 export default services

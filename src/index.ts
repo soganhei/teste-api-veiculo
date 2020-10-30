@@ -1,7 +1,7 @@
-import express = require('express');
+import express = require('express')
 
 
-import Handler from './handler';
+import Handler from './handler'
  
 const app = express();
  
