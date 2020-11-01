@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest ./src --verbose --notify",
-    "dev": "nodemon --watch './src' --exec 'sucrase-node ./src' -e ts",
+    "dev": "nodemon --watch './src'  --exec 'sucrase-node ./src' -e ts",
     "build": "tsc", 
     "lint:fix":""
   },

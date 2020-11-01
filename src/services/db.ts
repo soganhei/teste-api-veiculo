@@ -1,81 +1,61 @@
-export let database = new Array()
 
-export class ErrorNovoRegistro extends Error {
-  constructor(message?: string) {
-    super(message)
-    this.name = 'ErrorNovoRegistro'
-  }
+interface IDatabase {
+  [index:number]: any
 }
 
-const Create = async (payload: any): Promise<Error> => {
-  return new Promise((resolve, reject) => {
-    const t = database.length
-    const n = database.push(payload)
+export let database = {} as IDatabase
 
-    if (n === t) {
-      const err = new ErrorNovoRegistro()
-      reject(err)
+export const ErrorNovoRegistro = 'ErrorNovoRegistro'
+
+const Create = async (payload: any): Promise<void> => {
+
+  const i = Object.keys(database).length
+  database[payload.id] = payload
+
+  const n = Object.keys(database).length
+
+  if(i === n){
+    return Promise.reject('Não cadastrado')
+  } 
+
+}
+
+const Find = async (key: string): Promise<any[]> => {
+
+  const keys = (item:any) => item.key === key
+  return Object.values(database).filter(keys)
+
+}
+
+const Findbyid = async (id: number): Promise<any> => {
+  
+    const item = database[id]     
+    if(item === undefined){
+       return Promise.reject('Não encontrado')
     }
-    resolve(payload)
-  })
+    return item
 }
 
-const Find = async (key: string): Promise<[]> => {
-  return database.reduce((acc, item) => {
-    if (item.key === key) {
-      acc.push(item)
-    }
-    return acc
-  }, [])
-}
+const Update = async (id: number | any, value: any): Promise<void> => {
 
-const Findbyid = async (id: number): Promise<any | Error> => {
+  database[id] = value
   
-  try {
-
-    const index = await findIndex(id)
-    return database[index]
-    
-  } catch (error) {
-     return new Error(`Não encontrado ${id}`)
+  if(!Object.is(database[id], value)){
+    return Promise.reject('Não Atualizado')
   }
 
 }
 
-const Update = async (id: number | any, value: any): Promise<Error> => {
-  const index = await findIndex(id)
-  database[index] = value
-  return value
-}
+const Delete = async (id: number): Promise<void> => {
 
-const Delete = async (id: number): Promise<void | Error> => {
-
+  delete database[id] 
   
-  const index = await findIndex(id)
-  
-  const key = parseInt(`${index}`)
-  database.splice(key,1) 
+  if(database[id] !== undefined){
+      return Promise.reject('Não deletado')
+  }
    
 }
-
-const findIndex = async (id: number): Promise<keyof []> => {
-  return new Promise((resolve, rejects) => {
-    
-    let index = 0
-
-    database.forEach((item, idx) => {
-      if (item.id === id) {       
-        index = idx
-        return
-      }
-    })
-
-    if (index === 0 && database[index] === undefined) {
-      rejects(`Registro ${id} não encontrado`)
-    }
-    resolve(index)
-  })
-}
+ 
 
 export default {
   Create,

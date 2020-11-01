@@ -13,39 +13,22 @@ interface IParams {
 export const KEY = 'veiculos'
 
 const Find = async (params?: IParams): Promise<IVeiculos[]> => {
+  
   const veiculos: IVeiculos[] = await db.Find(KEY)
+  
+  const upperCase = (text:string) => text.toUpperCase()
 
-  const items: IVeiculos[] = []
-
-  const search = []
-
-  if (params?.placa !== undefined) {
-    search.push(params?.placa)
-  }
-
-  if (params?.marca !== undefined) {
-    search.push(params?.marca)
-  }
-
-  if (params?.cor !== undefined) {
-    search.push(params?.cor)
-  }
-
-  const s = search.join('|').toUpperCase()
-
-  veiculos.forEach((item) => {
+  const search = Object.values(params || {}).map( value => upperCase(value) ).join('|')
    
-    const label = `${item.placa}|${item.marca}|${item.cor}`.toUpperCase()
- 
-    if (label.indexOf(s) !== -1) {
-      items.push(item)
-     }
+  const searchVeiculo = (item:IVeiculos) =>{
 
-  })
+    const label = upperCase(`${item.placa}|${item.marca}|${item.cor}`)
+    if (label.indexOf(search) !== -1)  return item
 
-  if (items.length > 0 || search.length > 0) return items
+  }
 
-  return veiculos
+  const items = veiculos.filter(searchVeiculo)
+  return items
 }
 
 const FindByid = async (id: number): Promise<IVeiculos> => {
@@ -73,12 +56,15 @@ const Create = async (payload: IVeiculos): Promise<IVeiculos> => {
 
   payload.key = KEY
 
-  const response = await db.Create(payload)
-  if (response instanceof Error) {
-    throw errors.ErrorCadastrarVeiculo
-  }
+  try {
+    await db.Create(payload)
+    return payload
 
-  return payload
+  } catch (error) {
+    throw errors.ErrorCadastrarVeiculo
+    
+  } 
+   
 }
 
 const Update = async (payload: IVeiculos, id: number): Promise<IVeiculos> => {
@@ -109,10 +95,12 @@ const Delete = async (idVeiculo: number): Promise<void> => {
     throw errors.ErrorVeiculoRelacionado
   }
 
-  const response = await db.Delete(idVeiculo)
-  if (response instanceof Error) {
-    throw errors.ErrorDeletarVeiculo
+  try {
+    await db.Delete(idVeiculo)
+  } catch (error) {
+    throw errors.ErrorDeletarVeiculo    
   }
+   
 }
 
 const IsPlaca = async (placa: string): Promise<boolean> => {

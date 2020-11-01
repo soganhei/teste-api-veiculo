@@ -1,11 +1,10 @@
 import request from 'supertest'
 import { StatusCodes } from 'http-status-codes'
 
-import db from '../../services/db'
-
+ 
 import {IMotoristas} from '../../schemas'
 import app from '../'
- 
+  
 
 describe('Acitons Motoristas',()=>{
 
@@ -76,20 +75,17 @@ describe('Acitons Motoristas',()=>{
     })
 
     it('GET Listar motorista byid', async (done)=>{
-
-            await db.Create(payload)
             
             request(app)
             .get(`/motoristas/${id}`)
             .expect(StatusCodes.OK)
             .then((response)=>{
+                   const {body} =response
 
-                const data: IMotoristas = response.body
-                expect(id).toEqual(data.id)
-                done()
-                
+                   expect(payload.id).toEqual(body.id)
+                   done()
             })
-
+             
     })
     
     it('PUT Atualizar motorista byid', (done)=>{

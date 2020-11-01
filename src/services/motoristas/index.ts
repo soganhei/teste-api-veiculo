@@ -13,38 +13,39 @@ export const KEY = 'motoristas'
 
 const Find = async (params?: IParams): Promise<IMotoristas[]> => {
   const motoristas: IMotoristas[] = await db.Find(KEY)
+ 
+  const upperCase = (text:string) => text.toUpperCase()
+ 
+  const search = Object.values(params || {}).map( value => upperCase(value) ).join('')
 
-  const items: IMotoristas[] = []
+  const searchNome = (item:IMotoristas) => {
 
-  motoristas.forEach((item) => {
+    const nome = upperCase(item.nome)
+    if (nome.indexOf(search) !== -1)  return item
 
-    const nome = item.nome.toUpperCase()
-    const pNome = `${params?.nome}`.toUpperCase()
+  }
 
-    if (nome.indexOf(pNome) !== -1) {
-      items.push(item)
-    }
-
-  })
-
-  if (items.length > 0 || params?.nome !== undefined) return items
-
-  return motoristas
+  const items = motoristas.filter(searchNome)
+  return items
+  
 }
 
 const FindByid = async (id: number): Promise<IMotoristas> => {
 
-  const response = await db.Findbyid(id)
-   
-  if (response instanceof Error) {
-    throw errors.ErrorListarMotorista
-  }
+  try {
+    
+    const response = await db.Findbyid(id)
+    const item: IMotoristas = response
+    return item
 
-  const item: IMotoristas = response
-  return item
+  } catch (error) {
+      throw errors.ErrorListarMotorista        
+  }
+ 
 }
 
 const Create = async (payload: IMotoristas): Promise<IMotoristas> => {
+  
   const isNome = await IsNome(payload.nome)
   if (isNome) {
     throw errors.ErrorMotoristaCadastrado
@@ -57,11 +58,13 @@ const Create = async (payload: IMotoristas): Promise<IMotoristas> => {
 
   payload.key = KEY
 
-  const response = await db.Create(payload)
-  if (response instanceof Error) {
+  try {
+    await db.Create(payload)
+    return payload
+  } catch (error) {
     throw errors.ErrorCadastrarMotorista
-  }
-  return payload
+  } 
+
 }
 
 const Update = async (
@@ -92,10 +95,15 @@ const Delete = async (idMotorista: number): Promise<void> => {
     throw errors.ErrorMotoristaRelacionado
   }
 
-  const response = await db.Delete(idMotorista)
-  if (response instanceof Error) {
+  try {
+
+    await db.Delete(idMotorista)
+    
+  } catch (error) {
     throw errors.ErrorDeletarMotorista
-  }
+    
+  } 
+  
 }
 
 const IsNome = async (nome: string): Promise<boolean> => {

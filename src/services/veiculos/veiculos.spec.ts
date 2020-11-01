@@ -19,54 +19,52 @@ describe('Veículos', ()=>{
     it('Criar novo veículo', async ()=>{
          
            const response = await Services.Create(payload)
-           expect([payload.placa,payload.key]).toEqual([response.placa,response.key])
+           expect(response).toEqual(payload)
 
     })
 
     it('Listar Veículos', async()=>{
           
         const response = await Services.Find()
-        expect(1).toBe(response.length)
+        expect(response.length).toBe(1)
     })
 
     it('Validar veículo não cadastrado', async ()=>{
            
         const response = await Services.IsPlaca('XXX-XXX')
-        expect(false).toBe(response) 
+        expect(response).toBe(false) 
 
     })
 
     it('Validar veículo cadastrado', async ()=>{
            
         const response = await Services.IsPlaca('XXX-XX2')
-        expect(true).toBe(response) 
+        expect(response).toBe(true) 
 
     }) 
 
     it('Buscar veículo por placa', async ()=>{
 
          let response = await Services.Find({placa: 'XXXX-X'})
-         expect([]).toEqual(response)
+         expect(response).toEqual([])
 
          response = await Services.Find({placa:'XXX-XX2'})
-         expect(1).toBe(response.length)
+         expect(response.length).toBe(1)
     })
 
     it('Buscar veículo por marca', async ()=>{
 
         let response = await Services.Find({marca: 'Azul'})
-        expect([]).toEqual(response)
+        expect(response).toEqual([])
 
         response = await Services.Find({marca:'BMW'})
-        expect(1).toBe(response.length)
+        expect(response.length).toBe(1)
    })
 
     it('Listar veículo by id', async ()=>{
-
-        await db.Create(payload)
- 
+  
         const response = await Services.FindByid(id)
-        expect(payload).toEqual(response)
+        expect(response).toEqual(payload)
 
     })
     it('Atualizar veículo', async ()=>{
@@ -88,7 +86,7 @@ describe('Veículos', ()=>{
         try {
             await Services.FindByid(id)
         } catch (error) {
-             expect(errors.ErrorListarVeiculo).toBe(error)
+             expect(error).toBe(errors.ErrorListarVeiculo)
         }
     })
 
