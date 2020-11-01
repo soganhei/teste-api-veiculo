@@ -1,56 +1,89 @@
+import Services,{KEY} from './'
+import errors from './errors'
+import {IMotoristas} from '../../schemas'
+  
+describe('Motoristas', ()=>{
+  
+       const id = (Math.floor(new Date().getTime() / 1000)) + 10
 
-import {IMotorista} from '../../estrutura'
-import db from '../db'
+    
+       const payload: IMotoristas = {
+           id, 
+           key: KEY,
+           nome:'Marcus',
+           dataCriacao: new Date()
+       }
+ 
+      it('Criar novo motorista',async ()=>{
+               
+        const response = await Services.Create(payload)
+        expect(response.id).toBe(payload.id)
 
-const motorista = {
-    id:1,
-    nome:"Marcus", 
-    key:"test-motorista",
-    dataCriacao:new Date("2020-10-26T04:36:35.395Z")
-}
+      })
 
-describe("motoristas",()=>{
+      it('Validar motorista cadastrado',async ()=>{
 
-       it("Criar novo motorista",()=>{
+        const response = await Services.IsNome('Marcus')
+        expect(response).toBe(true)
+       
+      })
 
-           const payload:IMotorista = motorista
+      it('Validar motorista não cadastrado',async ()=>{
 
-           const novoVeiculo  = db.Create(payload)           
-           expect(payload).toEqual(novoVeiculo)
+        const response = await Services.IsNome('Marcus Antonio')
+        expect(response).toBe(false)
 
-       })
-       it("Listar motoristas",()=>{
-            
-           const veiculos: IMotorista[] = [motorista]
-
-           const items = db.Find("test-motorista")
-           expect(veiculos).toEqual(items)
-
-       })
-       it("Listar motorista byID",()=>{
-
-            const itemMotorista: IMotorista = db.Findbyid(1)
-            expect(motorista).toEqual(itemMotorista)
-
-       })
-       it("Atualizar motorista",()=>{
-
-            const payload = {
-                ...motorista,
-                nome:"Marcus Antonio"
-            }
-
-            const itemMotorista = db.Update(1,payload)
-            expect(payload).toEqual(itemMotorista)
-
-       })
-       it("Deletar motorista",()=>{
-
-        db.Delete(1)
-        const items = db.Find("test-motorista")
+      })
         
-        expect([]).toEqual(items)
 
-        }) 
+      it('Listar motoristas',async ()=>{
+
+        const response = await Services.Find()
+        expect(response.length).toBe(1)
+             
+      })
+
+      it('Listar motorista byid', async ()=>{
+ 
+        const response = await Services.FindByid(id)
+        expect(response).toEqual(payload)
+
+      })
+
+      it('Buscar motorista por nome',async ()=>{
+
+        let response = await Services.Find({nome:'Antonio'})
+        expect(response).toEqual([])
+
+        response = await Services.Find({nome:'Marcus'})
+        expect(response.length).toBe(1)
+
+             
+      })
+
+      
+
+      it('Atualizar motorista byid', async ()=>{
+ 
+        /**await Services.Update({
+            ...payload, 
+            nome:'Marcus Antonio',
+        },id)
+
+        const response = await Services.FindByid(id)
+        expect(response.nome).toBe('Marcus Antonio') */
+
+      })
+
+      it('Deletar motorista',async ()=>{
+
+            /**await Services.Delete(id)
+
+            try {
+              await Services.FindByid(id)
+            } catch (error) {
+              expect(error).toBe(errors.ErrorListarMotorista)
+            } */
+      })
 
 })

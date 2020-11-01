@@ -1,0 +1,109 @@
+FORMAT: 1A
+
+# Documentação
+
+Api para crição crição de motoristas, veículos e saídas de veículos
+
+ 
+
+## Instalação 
+
+> npm install
+
+## Rodar Tests
+
+> npm run test
+
+## Iniciar aplicação
+
+> npm run dev 
+
+O servidor sera executado na port default 5000
+http://localhost:5000
+
+# Motoristas [/motoristas]
+
+## Novo Motorista [POST]
+
++ Request (application/json)
+
+    + Body
+
+        {
+            "nome":"Marcus Antonio"
+        } 
+
++ Response 201
+
+    {
+        "id":1234,
+        "nome":"Marcus",
+        "dataCriacao": "2020-10-26T02:07:51.601Z"
+    }    
+ 
++ Response 400 
+
+Motorista já cadastrado
+ 
+## Listar motoristas [GET]
+
+
++ Request (application/json)
+
+    + Parameters
+
+        + nome (optional,string ) ... Nome do motorista
+
++ Response 200
+ 
+    + Body
+
+        [
+            {
+                "id":1234,
+                "nome":"Marcus",
+                "dataCriacao": "2020-10-26T02:07:51.601Z"
+            }
+        ] 
+
+## Listar motorista [GET /motoristas/:id]
+
++ Parameters
+        + id (number) ... Id do motorista
+
++ Request (application/json)
+
++ Response 200
+ 
+    + Body
+
+        {
+                "id":1234,
+                "nome":"Marcus",
+                "dataCriacao": "2020-10-26T02:07:51.601Z"
+        } 
+ 
+## Atualizar motorista [PUT /motoristas/:id]
+
++ Parameters
+        + id (number) ... Id do motorista
+
++ Request (application/json)
+
+    + Body
+
+        {
+                "id":1234,
+                "nome":"Marcus Antonio"                 
+        } 
+
++ Response 204
+
+## Deletar motorista [DELETE /motoristas/:id]
+
++ Parameters
+        + id (number) ... Id do motorista
+
++ Response 204
+  
+ 

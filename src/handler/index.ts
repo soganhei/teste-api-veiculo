@@ -1,30 +1,30 @@
-import express = require("express");
- 
-const app = express();
+import express = require('express')
+
+const app = express()
+
+app.use(express.json())
+
+import Services from '../services'
 
 import Motoristas from './motoristas'
 import Veiculos from './veiculos'
 import Saidas from './saidas'
-import Logs from './logs'
 
-app.post("/motoristas",Motoristas.Create)
-app.get("/motoristas",Motoristas.Find)
-app.get("/motoristas/:id",Motoristas.FindByid)
-app.put("/motoristas/:id",Motoristas.Update)
-app.delete("/motoristas/:id",Motoristas.Delete)
+const motoristas = Motoristas.NewHandler({
+  MotoristasServices: Services.MotoristasServices,   
+})
+app.use(motoristas)
 
-app.post("/veiculos",Veiculos.Create)
-app.get("/veiculos",Veiculos.Find)
-app.get("/veiculos/:id",Veiculos.FindByid)
-app.put("/veiculos/:id",Veiculos.Update)
-app.delete("/veiculos/:id",Veiculos.Delete)
+const veiculos = Veiculos.NewHandler({
+  VeiculosServices: Services.VeiculosServices,
+})
+app.use(veiculos)
 
-app.post("/saidas",Saidas.Create)
-app.get("/saidas",Saidas.Find)
-app.get("/saidas/:id",Saidas.FindByid)
-app.put("/saidas/:id",Saidas.Update)
-app.delete("/saidas/:id",Saidas.Delete)
-
-app.get("/logs",Logs.Find)
+const saidas = Saidas.NewHandler({
+  SaidasServices: Services.SaidasServices,
+  VeiculosServices: Services.VeiculosServices,
+  MotoristasServices: Services.MotoristasServices,
+})
+app.use(saidas)
 
 export default app

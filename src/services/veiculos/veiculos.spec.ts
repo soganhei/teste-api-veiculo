@@ -1,59 +1,93 @@
-
-import {IVeiculo} from '../../estrutura'
+import Services,{KEY} from './'
+import errors from './errors'
+import {IVeiculos} from '../../schemas'
 import db from '../db'
 
-const veiculo = {
-    id:2,
-    placa:"XXX-MMM",
-    cor:"Azul",
-    marca:"BMW", 
-    key:"test-veiculo",
-    dataCriacao:new Date("2020-10-26T04:36:35.395Z")
-}
+const id = Math.floor(new Date().getTime() / 1000)
 
-describe("veiculos",()=>{
+describe('Veículos', ()=>{
 
-       it("Criar novo veiculo",()=>{
+    const payload: IVeiculos = {
+        id, 
+        key: KEY, 
+        marca: 'BMW', 
+        cor:'Branca', 
+        placa: 'XXX-XX2', 
+        dataCriacao: new Date(),
+    }
+ 
+    it('Criar novo veículo', async ()=>{
+         
+           const response = await Services.Create(payload)
+           expect(response).toEqual(payload)
 
-           const payload:IVeiculo = veiculo
+    })
 
-           const novoVeiculo  = db.Create(payload)           
-           expect(payload).toEqual(novoVeiculo)
+    it('Listar Veículos', async()=>{
+          
+        const response = await Services.Find()
+        expect(response.length).toBe(1)
+    })
 
-       })
-       it("Listar veiculos",()=>{
-            
-           const veiculos: IVeiculo[] = [veiculo]
+    it('Validar veículo não cadastrado', async ()=>{
+           
+        const response = await Services.IsPlaca('XXX-XXX')
+        expect(response).toBe(false) 
 
-           const items = db.Find("test-veiculo")
-           expect(veiculos).toEqual(items)
+    })
 
-       })
-       it("Listar veiculo byID",()=>{
+    it('Validar veículo cadastrado', async ()=>{
+           
+        const response = await Services.IsPlaca('XXX-XX2')
+        expect(response).toBe(true) 
 
-            const itemVeiculo: IVeiculo = db.Findbyid(2)
-            expect(veiculo).toEqual(itemVeiculo)
+    }) 
 
-       })
-       it("Atualizar veiculo",()=>{
+    it('Buscar veículo por placa', async ()=>{
 
-            const payload = {
-                ...veiculo,
-                placa:"XXX-DBX",
-                cor:"Preta"
-            }
+         let response = await Services.Find({placa: 'XXXX-X'})
+         expect(response).toEqual([])
 
-            const itemVeiculo = db.Update(2,payload)
-            expect(payload).toEqual(itemVeiculo)
+         response = await Services.Find({placa:'XXX-XX2'})
+         expect(response.length).toBe(1)
+    })
 
-       })
-       it("Deletar veiculo",()=>{
+    it('Buscar veículo por marca', async ()=>{
 
-        db.Delete(2)
-        const items = db.Find("test-veiculo")
+        let response = await Services.Find({marca: 'Azul'})
+        expect(response).toEqual([])
+
+        response = await Services.Find({marca:'BMW'})
+        expect(response.length).toBe(1)
+   })
+
+    it('Listar veículo by id', async ()=>{
+  
+        const response = await Services.FindByid(id)
+        expect(response).toEqual(payload)
+
+    })
+    it('Atualizar veículo', async ()=>{
         
-        expect([]).toEqual(items)
+        await Services.Update({
+             ...payload, 
+             placa:'XXX-2',
+        },id)
 
-        })
+        const response = await Services.FindByid(id)
+        expect('XXX-2').toBe(response.placa)
+
+    })
+
+    it('Deletar veículo', async ()=>{
+         
+        await Services.Delete(id)
+
+        try {
+            await Services.FindByid(id)
+        } catch (error) {
+             expect(error).toBe(errors.ErrorListarVeiculo)
+        }
+    })
 
 })

@@ -1,104 +1,154 @@
-import { Request, Response } from "express";
-import {StatusCodes} from 'http-status-codes';
-import { IMotorista } from "../../estrutura";
+import express, { Request, Response } from 'express'
+import { StatusCodes } from 'http-status-codes'
 
+import {
+  IMotoristasServices,
+  IMotoristas,  
+} from '../../schemas'
 
-import Services from '../../services'
+import errors from '../../services/motoristas/errors'
 
+export interface IHandler {
+  MotoristasServices: IMotoristasServices   
+}
 
-const Find = (req: Request, res: Response)=>{
+let handler: IHandler
 
-    const query = req.query;
+const NewHandler = (h: IHandler) => {
+  handler = h
 
-    const items = Services.MotoristasServices.Find(query)
+  const router = express()
+ 
+  router
+    .post('/motoristas', Create)
+    .get('/motoristas', Find)
+    .get('/motoristas/:id', FindByid)
+    .put('/motoristas/:id', Update)
+    .delete('/motoristas/:id', Delete)
+
+   
+  return router
+}
+
+const Find = async (req: Request, res: Response) => {
+  const query = req.query
+
+  try {
+    const response = await handler.MotoristasServices.Find(query)
+    res.status(StatusCodes.OK)
+    res.send(response)
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST)
+    res.send({
+      message: 'Erro para listar motoristas',
+    })
+  }
+}
+
+const FindByid = async (req: Request, res: Response) => {
+  
+  const idMotorista = parseInt(req.params.id)
+  
+  try {
+    const response = await handler.MotoristasServices.FindByid(idMotorista)
     
     res.status(StatusCodes.OK)
-    res.send(items)
+    res.send(response)
+  } catch (error) {
+    let message
 
-}
-
-const FindByid = (req: Request, res: Response) =>{
-
-    const idMotorista= parseInt(req.params.id)
-
-    const item  = Services.MotoristasServices.FindByid(idMotorista)
-
-    res.status(StatusCodes.OK)
-    res.send(item)
-
-}
-
-const Create = (req: Request, res: Response)=>{
-     
-    const payload: IMotorista = req.body
-
-    const isNome = Services.MotoristasServices.IsNome(payload.nome)
-    if(isNome){
-
-        res.status(StatusCodes.BAD_REQUEST)
-
-        const message = `Motorista ${payload.nome} já cadastrado!`
-        
-         
-        res.send({ message }) 
-        return
+  
+    switch (error) {
+      case errors.ErrorListarMotorista:
+        message = `Error para listar motorista ${idMotorista}`
+        break
+      default:
+        break
     }
 
-    const item = Services.MotoristasServices.Create(payload)
- 
+    res.status(StatusCodes.BAD_REQUEST)
+    res.send({ message })
+  }
+}
+
+const Create = async (req: Request, res: Response) => {
+  const payload: IMotoristas = req.body
+
+  try {
+    const response = await handler.MotoristasServices.Create(payload)
     res.status(StatusCodes.CREATED)
-    res.send(item)
-    
+    res.send(response)
+  } catch (error) {
+    let message
+
+    switch (error) {
+      case errors.ErrorMotoristaCadastrado:
+        message = `Motorista ${payload.nome} já cadastrado`
+        break
+      case errors.ErrorCadastrarMotorista:
+        message = `Erro para cadatrar motorista ${payload.nome}`
+        break
+      default:
+        break
+    }
+
+    res.status(StatusCodes.BAD_REQUEST)
+    res.send({ message })
+  }
 }
 
-const Update = (req: Request, res: Response) =>{
+const Update = async (req: Request, res: Response) => {
+  const idMotorista = parseInt(req.params.id)
 
-    const idMotorista= parseInt(req.params.id)
-    
-    let payload: IMotorista = req.body
-     
-    const motorista = Services.MotoristasServices.Update(payload, idMotorista)
+  const payload: IMotoristas = req.body
 
+  try {
+    await handler.MotoristasServices.Update(payload, idMotorista)
     res.status(StatusCodes.OK)
-    res.send(motorista)
+    res.send(payload)
+  } catch (error) {
+    let message
 
+    switch (error) {
+      case errors.ErrorAtualizarMotorista:
+        message = `Error para atualizar motorista ${payload.nome}`
+        break
+      default:
+        break
+    }
+
+    res.status(StatusCodes.BAD_REQUEST)
+    res.send({ message })
+  }
 }
 
-const Delete = (req: Request, res: Response) =>{
-
-    const idMotorista= parseInt(req.params.id)
-
-    const isSaisas = Services.SaidasServices.IsItem("idMotorista",idMotorista)
-    if(isSaisas){
-
-        res.status(StatusCodes.BAD_REQUEST)
-        res.send({
-            message: `Erro para deletar motorista ${idMotorista}. Contem saídas vinculadas!`
-        }) 
-        return
-    }
- 
-    const ok  = Services.MotoristasServices.Delete(idMotorista)
-
-    if(!ok){
-
-        res.status(StatusCodes.BAD_REQUEST)
-        res.send({
-            message: `Erro para deletar motorista ${idMotorista}`
-        }) 
-        return    
-    }
+const Delete = async (req: Request, res: Response) => {
+  
+  const idMotorista = parseInt(req.params.id)
+  try {
+    
+    await handler.MotoristasServices.Delete(idMotorista)
 
     res.status(StatusCodes.NO_CONTENT)
-    res.send({})
+    res.send(null)
 
+  } catch (error) {
+    let message
+
+    switch (error) {
+      case errors.ErrorMotoristaRelacionado:
+        message = `Erro para deletar motorista ${idMotorista}. Contem saídas vinculadas!`
+        break
+      case errors.ErrorDeletarMotorista:
+        message = `Erro para deletar motorista ${idMotorista}`
+        break
+      default:
+        break
+    }
+
+    res.status(StatusCodes.BAD_REQUEST)
+    res.send({ message })
+  }
 }
 
-export default {
-    Find, 
-    Update, 
-    Create, 
-    Delete, 
-    FindByid, 
-
-}
+export default { NewHandler }

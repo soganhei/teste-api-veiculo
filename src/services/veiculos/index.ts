@@ -1,118 +1,126 @@
+import db from '../db'
+import { IVeiculos, IVeiculosServices } from '../../schemas'
+import SaidasServices from '../saidas'
 
-import {IVeiculo,IFormSaidaVeiculo} from '../../estrutura'
+import errors from './errors'
 
- 
 interface IParams {
-    placa?:String, 
-    marca?:String, 
-    cor?:String, 
+  placa?: string
+  marca?: string
+  cor?: string
 }
 
-import db from "../db"
+export const KEY = 'veiculos'
 
-const KEY = "veiculos"
-
-const Find = (params?:IParams):IVeiculo[] =>{
-
-    const veiculos: IVeiculo[] = db.Find(KEY)
-
-    const items: IVeiculo[] = []
-
-    veiculos.forEach(item=>{
-
-        let search = []
-
-        const label = `${item.placa}|${item.marca}|${item.cor}`.toUpperCase()
-        
-        if(params?.placa != undefined){
-            search.push(params?.placa)
-        }
-
-        if(params?.marca != undefined){
-            search.push(params?.marca)
-        }
-
-        if(params?.cor != undefined){
-            search.push(params?.cor)
-        }
-
-        const s = search.join("|").toUpperCase()
-        
-        if(label.indexOf(s) != -1){
-            items.push(item)
-        }
-
-    })
-
-    if(items.length > 0){
-        return items
-    }
-
-    return veiculos; 
-}
-
-const FindByid = (idVeiculo:Number):IVeiculo => {
-
-    let item: IVeiculo  = db.Findbyid(idVeiculo) 
-    return item; 
-
-}
-
-const Create = (payload:IVeiculo):IVeiculo | null =>{
-
-    const id = Math.floor(new Date().getTime() / 1000)
-         
-    payload.id = id
-    payload.dataCriacao =  new Date()
+const Find = async (params?: IParams): Promise<IVeiculos[]> => {
   
-    payload.key = KEY
+  const veiculos: IVeiculos[] = await db.Find(KEY)
+  
+  const upperCase = (text:string) => text.toUpperCase()
 
-    return  db.Create(payload); 
-    
-}
-
-const Update = (payload:IVeiculo,idVeiculo:Number):IVeiculo | null =>{
-
-    const item: IVeiculo = db.Findbyid(idVeiculo)
-    
-    payload = {
-        ...item, 
-        marca: payload.marca,
-        cor: payload.cor, 
-        placa: payload.placa,  
-    }   
+  const search = Object.values(params || {}).map( value => upperCase(value) ).join('|')
    
-    return  db.Update(idVeiculo, payload);   
+  const searchVeiculo = (item:IVeiculos) =>{
 
+    const label = upperCase(`${item.placa}|${item.marca}|${item.cor}`)
+    if (label.indexOf(search) !== -1)  return item
+
+  }
+
+  const items = veiculos.filter(searchVeiculo)
+  return items
 }
 
-const Delete = (idVeiculo:Number):Boolean =>{
-                      
-    db.Delete(idVeiculo)
-    return true; 
+const FindByid = async (id: number): Promise<IVeiculos> => {
 
+  const response = await db.Findbyid(id)
+
+  if (response instanceof Error) {
+    throw errors.ErrorListarVeiculo
+  }
+
+  const item: IVeiculos = await response
+  return item
 }
 
-const IsPlaca = (placa:String):Boolean =>{
+const Create = async (payload: IVeiculos): Promise<IVeiculos> => {
+  const isPlaca = IsPlaca(payload.placa)
+  if (!isPlaca) {
+    throw errors.ErrorVeiculoCadastrado
+  }
+
+  const id = Math.floor(new Date().getTime() / 1000)
+
+  payload.id = id
+  payload.dataCriacao = new Date()
+
+  payload.key = KEY
+
+  try {
+    await db.Create(payload)
+    return payload
+
+  } catch (error) {
+    throw errors.ErrorCadastrarVeiculo
     
-    const items: IVeiculo[] = db.Find(KEY)
-
-    const item = items.filter((item)=> {return item.placa == placa})
-
-    if(item.length > 0){
-        return true; 
-    }
-    return false; 
+  } 
+   
 }
 
+const Update = async (payload: IVeiculos, id: number): Promise<IVeiculos> => {
+  
+  let response = await db.Findbyid(id)
+  if(response instanceof Error){
+     throw errors.ErrorListarVeiculo
+  }
 
-export default {
-    Find, 
-    Update, 
-    Create, 
-    Delete, 
-    FindByid, 
-    IsPlaca, 
-    
+  payload = {
+    ...response,
+    marca: payload.marca,
+    cor: payload.cor,
+    placa: payload.placa,
+  }
 
+  response = await db.Update(id, payload)
+  if (response instanceof Error) {
+    throw errors.ErrorAtualizarVeiculo
+  }
+  return payload
 }
+
+const Delete = async (idVeiculo: number): Promise<void> => {
+
+  const isPlaca = await SaidasServices.ForenKey('idVeiculo', idVeiculo)
+  if (isPlaca) {
+    throw errors.ErrorVeiculoRelacionado
+  }
+
+  try {
+    await db.Delete(idVeiculo)
+  } catch (error) {
+    throw errors.ErrorDeletarVeiculo    
+  }
+   
+}
+
+const IsPlaca = async (placa: string): Promise<boolean> => {
+  const veiculos: IVeiculos[] = await db.Find(KEY)
+
+  const isPlaca = (item:IVeiculos) => item.placa === placa
+  const items = veiculos.filter(isPlaca).length
+
+  if (items > 0) return true
+  return false
+  
+}
+
+const services: IVeiculosServices = {
+  Find,
+  Update,
+  Create,
+  Delete,
+  FindByid,
+  IsPlaca,
+}
+
+export default services

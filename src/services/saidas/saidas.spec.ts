@@ -1,110 +1,54 @@
+import Services,{KEY} from './'
+import errors from './errors'
+import {IMotoristas,IVeiculos, ISaidas, ISaidasForm} from '../../schemas'
 
-import {IFormSaidaVeiculo,ISaidaVeiculos,IMotorista,IVeiculo} from '../../estrutura'
 import db from '../db'
 
-const motorista = {
-    id:4, 
-    nome:"Marcus",
-    key:"test-motorista",
-    dataCriacao:new Date("2020-10-26T04:36:35.395Z")
-}
+describe('Saídas',()=>{
 
-const veiculo = {
-    id:5,
-    placa:"XXX-MMM",
-    cor:"Azul",
-    marca:"BMW", 
-    key:"test-veiculo",
-    dataCriacao:new Date("2020-10-26T04:36:35.395Z")
-}
+      const id =  Math.floor(new Date().getTime() / 1000)
+      const idMotorista = id + 1
+      const idVeiculo   = id + 2
 
-const saida = {
-    id:3,
-    idMotorista:4,
-    idVeiculo:5,
-    motivoSaida:"Viagem à SP", 
-    dataSaida:"2020-10-26",
-    dataEntrada:"",
-    key:"test-saida",
-    dataCriacao:new Date("2020-10-26T04:36:35.395Z")
-}
+      db.Create({
+            key:'motoristas', 
+            id: idMotorista, 
+      })
 
-describe("saidas",()=>{
+      db.Create({
+            key: 'veiculos', 
+            id: idVeiculo, 
+      })
 
-       it("Criar nova saida",()=>{
+      const payload:ISaidasForm = {
+           id, 
+           key: KEY, 
+           idMotorista, 
+           idVeiculo, 
+           dataCriacao: new Date(), 
+           dataSaida: '2020-01-01',
+           motivoSaida: 'xxx', 
+           dataEntrada: '2020-01-02', 
+      }
 
-           const payload:IFormSaidaVeiculo = saida
+      it('Nova saída', async ()=>{
 
-           const novoMotorista = db.Create(motorista)
-           expect(motorista).toEqual(novoMotorista)  
+        const response = await Services.Create(payload)
+        expect(response).toEqual(payload)
 
-           const novoVeiculo = db.Create(veiculo)
-           expect(veiculo).toEqual(novoVeiculo)  
+      })
 
-           const novaSaida  = db.Create(payload)           
-           expect(payload).toEqual(novaSaida)
+      it('Listar saídas', async ()=>{
 
-       })
-       it("Listar saidas",()=>{
-            
-           const itemSaida: ISaidaVeiculos[] = [{
-               ...saida,
-               motorista,
-               veiculo, 
-            }]
+          const response = await Services.Find()           
+          expect(response.length).toBe(1)
 
-           const saidas:ISaidaVeiculos[] = db.Find("test-saida")
+      })
 
-           let items : ISaidaVeiculos[] = []
-
-           saidas.forEach((item)=>{
-               
-                  const {idMotorista,idVeiculo} = item
-                  const m : IMotorista = db.Findbyid(idMotorista)
-                  const v : IVeiculo = db.Findbyid(idVeiculo)
-
-                  items.push({
-                      ...item, 
-                      motorista: m, 
-                      veiculo: v, 
-                  })
-           })
-
-           expect(itemSaida).toEqual(items)
-
-       })
-       it("Listar saida byID",()=>{
-
-            const itemSaida: IFormSaidaVeiculo = db.Findbyid(3)
-            expect(saida).toEqual(itemSaida)
-
-       })
-       it("Atualizar saida",()=>{
-
-            const payload = {
-                ...saida,
-                dataEntrada:"2020-10-27",
-            }
-
-            const itemSaida = db.Update(3,payload)
-            expect(payload).toEqual(itemSaida)
-
-       })
-       it("Deletar saida",()=>{
-
-        db.Delete(3)
-        db.Delete(4)
-        db.Delete(5)
-
-        const itemsMotorista = db.Find("test-motorista")
-        expect([]).toEqual(itemsMotorista)
-
-        const itemsVeiculo = db.Find("test-veiculo")
-        expect([]).toEqual(itemsVeiculo)
-
-        const itemsSaida = db.Find("test-saida")
-        expect([]).toEqual(itemsSaida)
-
-        })
+      it('Listar saída byid', async ()=>{
+           
+          const response = await Services.FindByid(id)
+          expect([response.idMotorista, response.idVeiculo]).toEqual([idMotorista, idVeiculo])
+      })
 
 })

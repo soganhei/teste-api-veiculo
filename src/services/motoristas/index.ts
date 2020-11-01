@@ -1,95 +1,129 @@
+import db from '../db'
 
-import {IMotorista,IFormSaidaVeiculo} from '../../estrutura'
+import { IMotoristasServices, IMotoristas } from '../../schemas'
+import SaidasServices from '../saidas'
 
- 
+import errors from './errors'
+
 interface IParams {
-    nome?:String, 
+  nome?: string
 }
 
-import db from "../db"
+export const KEY = 'motoristas'
 
-const KEY =  'motoristas'
-
-const Find = (params?:IParams):IMotorista[] =>{
+const Find = async (params?: IParams): Promise<IMotoristas[]> => {
+  const motoristas: IMotoristas[] = await db.Find(KEY)
  
-    const motoristas: IMotorista[] = db.Find(KEY)
+  const upperCase = (text:string) => text.toUpperCase()
+ 
+  const search = Object.values(params || {}).map( value => upperCase(value) ).join('')
 
-    let items: IMotorista[] = []
+  const searchNome = (item:IMotoristas) => {
 
-    motoristas.forEach((item) =>{
+    const nome = upperCase(item.nome)
+    if (nome.indexOf(search) !== -1)  return item
 
-        const nome  = item.nome.toUpperCase()
-        const pNome = `${params?.nome}`.toUpperCase()
+  }
 
-        if(nome.indexOf(pNome) != -1){
-            items.push(item)
-        }
-
-    })
-
-    if(items.length > 0){
-        return items
-    }
-    return motoristas 
-}
-
-const FindByid = (idMotorista:Number):IMotorista => {
-
-    let item: IMotorista  = db.Findbyid(idMotorista) 
-    return item; 
+  const items = motoristas.filter(searchNome)
+  return items
 
 }
 
-const Create = (payload:IMotorista):IMotorista | null =>{
+const FindByid = async (id: number): Promise<IMotoristas> => {
 
-    const id = Math.floor(new Date().getTime() / 1000)
-         
-    payload.id = id
-    payload.dataCriacao =  new Date()
+  try {
+    
+    const response = await db.Findbyid(id)
+    const item: IMotoristas = response
+    return item
+
+  } catch (error) {
+      throw errors.ErrorListarMotorista        
+  }
+ 
+}
+
+const Create = async (payload: IMotoristas): Promise<IMotoristas> => {
   
-    payload.key = KEY
+  const isNome = await IsNome(payload.nome)
+  if (isNome) {
+    throw errors.ErrorMotoristaCadastrado
+  }
 
-    return db.Create(payload); 
+  const id = Math.floor(new Date().getTime() / 1000)
+
+  payload.id = id
+  payload.dataCriacao = new Date()
+
+  payload.key = KEY
+
+  try {
+    await db.Create(payload)
+    return payload
+  } catch (error) {
+    throw errors.ErrorCadastrarMotorista
+  } 
+
+}
+
+const Update = async (
+  payload: IMotoristas,
+  id: number
+): Promise<IMotoristas> => {
+
+  let response = await db.Findbyid(id)
+  if(response instanceof Error){
+      throw errors.ErrorListarMotorista
+  }
+
+  payload = { ...response, nome: payload.nome }
+
+  response = await db.Update(id, payload)
+  if (response instanceof Error) {
+    throw errors.ErrorAtualizarMotorista
+  }
+
+  return payload
+}
+
+const Delete = async (idMotorista: number): Promise<void> => {
+
+  const isMotorista = await SaidasServices.ForenKey('idMotorista', idMotorista)
+   
+  if (isMotorista) {
+    throw errors.ErrorMotoristaRelacionado
+  }
+
+  try {
+
+    await db.Delete(idMotorista)
     
-}
-
-const Update = (payload:IMotorista,idMotorista:Number):IMotorista | null =>{
-
-    const item: IMotorista = db.Findbyid(idMotorista)
+  } catch (error) {
+    throw errors.ErrorDeletarMotorista
     
-    payload = {
-        ...item, 
-        nome: payload.nome, 
-    }
-    return db.Update(idMotorista, payload)
-
+  } 
+  
 }
 
-const Delete = (idMotorista:Number):Boolean =>{
-                      
-    db.Delete(idMotorista)
-    return true; 
+const IsNome = async (nome: string): Promise<boolean> => {
+  const motoristas: IMotoristas[] = await db.Find(KEY)
+
+  const isNome = (item:IMotoristas) => item.nome === nome
+  const items  = motoristas.filter(isNome).length
+
+  if (items > 0) return true
+  return false
+  
 }
 
-const IsNome = (nome:String):Boolean =>{
-    
-    const items: IMotorista[] = db.Find(KEY)
-
-    const item = items.filter((item)=> {return item.nome == nome})
-
-    if(item.length > 0){
-        return true; 
-    }
-    return false; 
+const services: IMotoristasServices = {
+  Find,
+  Update,
+  Create,
+  Delete,
+  FindByid,
+  IsNome,
 }
- 
 
-export default {
-    Find, 
-    Update, 
-    Create, 
-    Delete, 
-    FindByid,  
-    IsNome,    
-
-}
+export default services

@@ -1,108 +1,172 @@
+import db, { database } from '../db'
 
-import {IMotorista, IVeiculo,ISaidaVeiculos,IFormSaidaVeiculo} from '../../estrutura'
+import {
+  IMotoristas,
+  IVeiculos,
+  ISaidas,
+  ISaidasForm,
+  ISaidasServices,
+} from '../../schemas'
+import { FormatDate, FormatDatePtBr } from '../../lib'
 
-import {FormatDate,FormatDatePtBr} from '../../lib'
-
-import db from "../db"
-
-const KEY = 'saidas'
-
-const Find = ():ISaidaVeiculos[] =>{
-
-    const saidas: IFormSaidaVeiculo[] = db.Find(KEY)
-
-    let items: ISaidaVeiculos[] = []
-
-    saidas.forEach((item)=>{
-
-            const {                
-                idMotorista, 
-                idVeiculo,                
-                dataSaida, 
-                dataEntrada, 
-            } = item; 
-
-            const motorista: IMotorista = db.Findbyid(idMotorista)
-            const veiculo : IVeiculo = db.Findbyid(idVeiculo)
-
-            items.push({
-                ...item, 
-                motorista, 
-                veiculo,                 
-                dataSaida: FormatDatePtBr(dataSaida), 
-                dataEntrada: FormatDatePtBr(dataEntrada), 
-            })
-
-    })
-    return items; 
-}
-
-const FindByid = (idSaida:Number):ISaidaVeiculos => {
-
-    let item: ISaidaVeiculos  = db.Findbyid(idSaida) 
-
-    const motorista: IMotorista = db.Findbyid(item.idMotorista)
-    const veiculo : IVeiculo = db.Findbyid(item.idVeiculo)
-
-    item.motorista = motorista
-    item.veiculo= veiculo
-
-    return item; 
-
-}
-
-const Create = (payload:IFormSaidaVeiculo):IFormSaidaVeiculo | null =>{
-
-    const id = Math.floor(new Date().getTime() / 1000)
-         
-    payload.id = id
-    payload.dataCriacao =  new Date()
-    payload.dataSaida = FormatDate(new Date())
-  
-    payload.key = KEY
+import errors from './errors'
  
-    return db.Create(payload); 
-    
-}
+export const KEY = 'saidas'
 
-const Update = (payload:IFormSaidaVeiculo,idMotorista:Number):IFormSaidaVeiculo | null =>{
+const Find = async (): Promise<ISaidas[]> => {
 
-    const item: IFormSaidaVeiculo = db.Findbyid(idMotorista)
-        
-    payload = {
+  const saidas: ISaidasForm[] = await db.Find(KEY)
+  const promises = saidas.map(async (item)=>{
+
+    const { idMotorista, idVeiculo, dataSaida, dataEntrada } = item
+    const {motorista, veiculo} = await listarMotoristaVeiculo(idMotorista, idVeiculo)
+
+      return {
         ...item, 
-        dataEntrada: payload.dataEntrada,         
-    }
+        veiculo,
+        motorista,
+        dataSaida: FormatDatePtBr(dataSaida),
+        dataEntrada: FormatDatePtBr(dataEntrada),
+      }
+  })
+
+  const items = await Promise.all(promises)
+  return items
+}
+
+const FindByid = async (id: number): Promise<ISaidas> => {
+  const item: ISaidas = await db.Findbyid(id)
+
+  const {motorista, veiculo} = await listarMotoristaVeiculo(item.idMotorista, item.idVeiculo)
+  return { ...item, motorista, veiculo }
+
+}
+
+const Create = async (payload: ISaidasForm): Promise<ISaidasForm> => {
+
+  const validarVMNaoCadastrado = async (idMotorista:number, idVeiculo:number): Promise<boolean> =>{
+
+    const motorista = db.Findbyid(idMotorista)
+    const veiculo   = db.Findbyid(idVeiculo)
+    
+    try {
+
+      Promise.all([motorista, veiculo])
+      return false
       
-    return db.Update(idMotorista, payload);   
-
-}
- 
-const Delete = (idMotorista:Number):Boolean =>{
-                      
-    db.Delete(idMotorista)
-    return true; 
-
-}
-
-const IsItem = (column: keyof IFormSaidaVeiculo, value: any):Boolean =>{
-
-    const items: IFormSaidaVeiculo[] = db.Find(KEY)
-
-    const item = items.filter((item)=> {return item[column] == value})
-
-    if(item.length > 0){
-        return true; 
+    } catch (error) {        
+        return true
     }
-    return false; 
+
+  }
+
+  const isMV = await validarVMNaoCadastrado(payload.idMotorista, payload.idVeiculo)
+  if (isMV) {
+    throw errors.ErrorVMNaoCadastrado
+  }
+
+  const validarSaidaCadastrada = async (idMotorista:number, idVeiculo: number): Promise<boolean> =>{
+
+    const dataSaida = FormatDate(new Date())
+    
+    const motorista = ForenKey('idMotorista', idMotorista)
+    const veiculo   = ForenKey('idVeiculo', idVeiculo)
+    const data      = ForenKey('dataSaida', dataSaida)
+
+     try {
+
+        Promise.all([motorista, veiculo, data])
+        return false
+       
+     } catch (error) {
+        return true
+     }
+
+  }
+
+  const isSaida = await validarSaidaCadastrada(payload.idMotorista, payload.idVeiculo)
+
+  if (isSaida) {
+      throw errors.ErrorSaidaCadastrada
+  }
+
+  const id = Math.floor(new Date().getTime() / 1000)
+
+  payload.id = id
+  payload.dataCriacao = new Date()
+  payload.dataSaida = FormatDate(new Date())
+
+  payload.key = KEY
+
+  try {
+    await db.Create(payload)
+    return payload
+    
+  } catch (error) {
+    throw errors.ErrorCadastrarSaida    
+  }
+   
 }
 
-export default {
-    Find, 
-    Update, 
-    Create, 
-    Delete, 
-    FindByid, 
-    IsItem, 
+const Update = async (
+  payload: ISaidasForm,
+  id: number
+): Promise<ISaidasForm> => {
+  const item: ISaidasForm = await db.Findbyid(id)
+
+  payload = { ...item, dataEntrada: payload.dataEntrada }
+
+  try {
+    await db.Update(id, payload)
+    return payload
+  } catch (error) {
+    throw errors.ErrorCadastrarSaida    
+  }   
 
 }
+
+const Delete = async (idMotorista: number): Promise<void> => {
+
+  try {
+     await db.Delete(idMotorista)    
+  } catch (error) {
+    throw errors.ErrorDeletarSaida    
+  }   
+}
+
+const ForenKey = async (
+  key: keyof ISaidasForm,
+  value: any
+): Promise<boolean> => {
+  const saidas: ISaidasForm[] = await db.Find(KEY)
+
+  const fk = (item:any) => item[key] === value
+  const items = saidas.filter(fk).length
+
+  if (items > 0) Promise.reject(true)
+  return false
+  
+}
+
+const listarMotoristaVeiculo = async (idMotorista:number, idVeiculo:number): Promise<any> => {
+ 
+  const motorista: IMotoristas = await db.Findbyid(idMotorista)
+  const veiculo: IVeiculos     = await db.Findbyid(idVeiculo)
+ 
+  return {
+    motorista,
+    veiculo, 
+  }
+  
+}
+
+const services: ISaidasServices = {
+  Find,
+  Update,
+  Create,
+  Delete,
+  FindByid,
+  ForenKey,
+}
+
+export default services

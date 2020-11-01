@@ -1,103 +1,143 @@
-import { Request, Response } from "express";
-import {StatusCodes} from 'http-status-codes';
-import { IVeiculo } from "../../estrutura";
+import express, { Request, Response } from 'express'
+import { StatusCodes } from 'http-status-codes'
 
+import { IVeiculos, IVeiculosServices } from '../../schemas'
 
-import Services from '../../services'
+import errors from '../../services/veiculos/errors'
 
-
-const Find = (req: Request, res: Response)=>{
-
-    const query = req.query;
-
-    const items = Services.VeiculosServices.Find(query)
-    
-    res.status(StatusCodes.OK)
-    res.send(items)
-
+export interface IHandler {
+  VeiculosServices: IVeiculosServices
 }
 
-const FindByid = (req: Request, res: Response) =>{
+let handler: IHandler
 
-    const idVeiculo= parseInt(req.params.id)
+const NewHandler = (h: IHandler) => {
+  handler = h
 
-    const item  = Services.VeiculosServices.FindByid(idVeiculo)
-
-    res.status(StatusCodes.OK)
-    res.send(item)
-
+  const router = express()
+  router
+    .post('/veiculos', Create)
+    .get('/veiculos', Find)
+    .get('/veiculos/:id', FindByid)
+    .put('/veiculos/:id', Update)
+    .delete('/veiculos/:id', Delete)
+  return router
 }
 
-const Create = (req: Request, res: Response)=>{
+const Find = async (req: Request, res: Response) => {
+  const query = req.query
 
-     
-    const payload: IVeiculo = req.body
+  try {
+    const response = await handler.VeiculosServices.Find(query)
 
-    const isPlaca = Services.VeiculosServices.IsPlaca(payload.placa)
-    if(isPlaca){
+    res.status(StatusCodes.OK)
+    res.send(response)
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST)
+    res.send({ message: error.message })
+  }
+}
 
-        res.status(StatusCodes.BAD_REQUEST)
-        res.send({
-            message:`Placa ${payload.placa} já cadatrada!`
-        })
-        return 
+const FindByid = async (req: Request, res: Response) => {
+  const idVeiculo = parseInt(req.params.id)
+
+  try {
+    const response = await handler.VeiculosServices.FindByid(idVeiculo)
+
+    res.status(StatusCodes.OK)
+    res.send(response)
+  } catch (error) {
+    let message
+
+    switch (error) {
+      case errors.ErrorListarVeiculo:
+        message = `Error para listar motorista ${idVeiculo}`
+        break
+      default:
+        break
     }
 
-    const item = Services.VeiculosServices.Create(payload)
+    res.status(StatusCodes.BAD_REQUEST)
+    res.send({ message })
+  }
+}
 
+const Create = async (req: Request, res: Response) => {
+  const payload: IVeiculos = req.body
+
+  try {
+    const response = await handler.VeiculosServices.Create(payload)
     res.status(StatusCodes.CREATED)
-    res.send(item)
-    
+    res.send(response)
+  } catch (error) {
+    let message
+
+    switch (error) {
+      case errors.ErrorVeiculoCadastrado:
+        message = `${payload.placa} já cadastrada`
+        break
+      case errors.ErrorCadastrarVeiculo:
+        message = `Error para cadastrada veículo. Placa ${payload.placa}`
+        break
+      default:
+        break
+    }
+
+    res.status(StatusCodes.BAD_REQUEST)
+    res.send({ message })
+  }
 }
 
-const Update = (req: Request, res: Response) =>{
+const Update = async (req: Request, res: Response) => {
+  const idVeiculo = parseInt(req.params.id)
 
-    const idVeiculo= parseInt(req.params.id)
-    
-    let payload: IVeiculo = req.body
-     
-    const item = Services.VeiculosServices.Update(payload, idVeiculo)
+  const payload: IVeiculos = req.body
 
+  try {
+    await handler.VeiculosServices.Update(payload, idVeiculo)
     res.status(StatusCodes.OK)
-    res.send(item)
+    res.send(payload)
+  } catch (error) {
+    let message
 
+    switch (error) {
+      case errors.ErrorAtualizarVeiculo:
+        message = `Error para atualizar veículo ${payload.placa}`
+        break
+      default:
+        break
+    }
+
+    res.status(StatusCodes.BAD_REQUEST)
+    res.send({ message })
+  }
 }
 
-const Delete = (req: Request, res: Response) =>{
+const Delete = async (req: Request, res: Response) => {
+  const idVeiculo = parseInt(req.params.id)
 
-    const idVeiculo= parseInt(req.params.id)
-
-    const isSaidas = Services.SaidasServices.IsItem("idVeiculo",idVeiculo)
-    if(isSaidas){
-
-        res.status(StatusCodes.BAD_REQUEST)
-        res.send({
-            message: `Erro para deletar veiculo ${idVeiculo}. Contem saídas vinculadas!`
-        }) 
-        return
-    }
-
-    const ok  = Services.VeiculosServices.Delete(idVeiculo)
-
-    if(!ok){
-
-        res.status(StatusCodes.BAD_REQUEST)
-        res.send({
-            message: `Erro para deletar Veiculo ${idVeiculo}`
-        }) 
-        return    
-    }
+  try {
+    await handler.VeiculosServices.Delete(idVeiculo)
 
     res.status(StatusCodes.NO_CONTENT)
-    res.send({})
+    res.send(null)
+  } catch (error) {
+    let message
 
+    switch (error) {
+      case errors.ErrorDeletarVeiculo:
+        message = 'Error para deletar veículo'
+        break
+      case errors.ErrorVeiculoRelacionado:
+        message = 'Saídas relacionadas ao veículo'
+        break
+      default:
+        break
+    }
+
+    res.status(StatusCodes.BAD_REQUEST)
+    res.send({ message })
+  }
 }
 
-export default {
-    Find, 
-    Update, 
-    Create, 
-    Delete, 
-    FindByid, 
-
-}
+export default { NewHandler }
