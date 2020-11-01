@@ -141,11 +141,11 @@ const ForenKey = async (
   const saidas: ISaidasForm[] = await db.Find(KEY)
 
   const fk = (item:any) => item[key] === value
-  const items = saidas.filter(fk)
+  const items = saidas.filter(fk).length
 
-  if (items.length > 0) Promise.reject(true)
-
+  if (items > 0) Promise.reject(true)
   return false
+  
 }
 
 const listarMotoristaVeiculo = async (idMotorista:number, idVeiculo:number): Promise<any> => {

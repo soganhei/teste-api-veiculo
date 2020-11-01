@@ -27,7 +27,7 @@ const Find = async (params?: IParams): Promise<IMotoristas[]> => {
 
   const items = motoristas.filter(searchNome)
   return items
-  
+
 }
 
 const FindByid = async (id: number): Promise<IMotoristas> => {
@@ -109,12 +109,12 @@ const Delete = async (idMotorista: number): Promise<void> => {
 const IsNome = async (nome: string): Promise<boolean> => {
   const motoristas: IMotoristas[] = await db.Find(KEY)
 
-  const items = motoristas.filter( item => item.nome == nome)
+  const isNome = (item:IMotoristas) => item.nome === nome
+  const items  = motoristas.filter(isNome).length
 
-  if (items.length > 0) {
-    return true
-  }
+  if (items > 0) return true
   return false
+  
 }
 
 const services: IMotoristasServices = {

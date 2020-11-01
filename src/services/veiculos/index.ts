@@ -106,12 +106,12 @@ const Delete = async (idVeiculo: number): Promise<void> => {
 const IsPlaca = async (placa: string): Promise<boolean> => {
   const veiculos: IVeiculos[] = await db.Find(KEY)
 
-  const items = veiculos.filter( item => item.placa == placa)
+  const isPlaca = (item:IVeiculos) => item.placa === placa
+  const items = veiculos.filter(isPlaca).length
 
-  if (items.length > 0) {
-    return true
-  }
+  if (items > 0) return true
   return false
+  
 }
 
 const services: IVeiculosServices = {
