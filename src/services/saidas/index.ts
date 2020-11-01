@@ -16,29 +16,43 @@ export const KEY = 'saidas'
 const Find = async (): Promise<ISaidas[]> => {
 
   const saidas: ISaidasForm[] = await db.Find(KEY)
-  const promises = saidas.map(async (item)=>{
 
-    const { idMotorista, idVeiculo, dataSaida, dataEntrada } = item
-    const {motorista, veiculo} = await listarMotoristaVeiculo(idMotorista, idVeiculo)
+  const listSaidas = async (item:ISaidas | any): Promise<ISaidas> =>{
 
-      return {
-        ...item, 
-        veiculo,
-        motorista,
-        dataSaida: FormatDatePtBr(dataSaida),
-        dataEntrada: FormatDatePtBr(dataEntrada),
-      }
-  })
+  const { idMotorista, idVeiculo, dataSaida, dataEntrada } = item
+  const {motorista, veiculo} = await listarMotoristaVeiculo(idMotorista, idVeiculo)
+
+  return {
+    ...item, 
+    veiculo,
+    motorista,
+    dataSaida:   FormatDatePtBr(dataSaida),
+    dataEntrada: FormatDatePtBr(dataEntrada || ''),
+  }
+
+  }
+
+  const promises = saidas.map(listSaidas)
 
   const items = await Promise.all(promises)
   return items
 }
 
 const FindByid = async (id: number): Promise<ISaidas> => {
-  const item: ISaidas = await db.Findbyid(id)
-
-  const {motorista, veiculo} = await listarMotoristaVeiculo(item.idMotorista, item.idVeiculo)
-  return { ...item, motorista, veiculo }
+    
+  try {
+    
+    const response: ISaidasForm = await db.Findbyid(id)
+    const {motorista, veiculo}  = await listarMotoristaVeiculo(response.idMotorista, response.idVeiculo)
+    
+    return { 
+        ...response, 
+        motorista, 
+        veiculo 
+    }
+  } catch (error) {
+      throw error
+  } 
 
 }
 
@@ -59,12 +73,7 @@ const Create = async (payload: ISaidasForm): Promise<ISaidasForm> => {
     }
 
   }
-
-  const isMV = await validarVMNaoCadastrado(payload.idMotorista, payload.idVeiculo)
-  if (isMV) {
-    throw errors.ErrorVMNaoCadastrado
-  }
-
+ 
   const validarSaidaCadastrada = async (idMotorista:number, idVeiculo: number): Promise<boolean> =>{
 
     const dataSaida = FormatDate(new Date())
@@ -83,27 +92,43 @@ const Create = async (payload: ISaidasForm): Promise<ISaidasForm> => {
      }
 
   }
-
-  const isSaida = await validarSaidaCadastrada(payload.idMotorista, payload.idVeiculo)
-
-  if (isSaida) {
-      throw errors.ErrorSaidaCadastrada
-  }
-
-  const id = Math.floor(new Date().getTime() / 1000)
-
-  payload.id = id
-  payload.dataCriacao = new Date()
-  payload.dataSaida = FormatDate(new Date())
-
-  payload.key = KEY
-
+ 
+  
   try {
+
+    const isMV = await validarVMNaoCadastrado(payload.idMotorista, payload.idVeiculo)
+    if (isMV) {
+      throw errors.ErrorVMNaoCadastrado
+    }
+    
+    const isSaida = await validarSaidaCadastrada(payload.idMotorista, payload.idVeiculo)
+    if (isSaida) {
+        throw errors.ErrorSaidaCadastrada
+    }
+    
+    const id = Math.floor(new Date().getTime() / 1000)
+  
+    payload.id = id
+    payload.dataCriacao = new Date()
+    payload.dataSaida = FormatDate(new Date())
+    payload.dataEntrada= ''
+  
+    payload.key = KEY
+
     await db.Create(payload)
     return payload
     
   } catch (error) {
-    throw errors.ErrorCadastrarSaida    
+
+    switch(error){
+        case errors.ErrorSaidaCadastrada:
+        throw error    
+        case errors.ErrorVMNaoCadastrado:
+        throw error  
+        default:
+        throw errors.ErrorCadastrarSaida    
+    }
+
   }
    
 }
@@ -112,13 +137,14 @@ const Update = async (
   payload: ISaidasForm,
   id: number
 ): Promise<ISaidasForm> => {
-  const item: ISaidasForm = await db.Findbyid(id)
-
-  payload = { ...item, dataEntrada: payload.dataEntrada }
-
+  
   try {
-    await db.Update(id, payload)
-    return payload
+
+    const response: ISaidasForm =  await db.Findbyid(id)
+    const data  = { ...response, dataEntrada: payload.dataEntrada }
+   
+    await db.Update(id, data)
+    return data
   } catch (error) {
     throw errors.ErrorCadastrarSaida    
   }   
@@ -145,7 +171,7 @@ const ForenKey = async (
 
   if (items > 0) Promise.reject(true)
   return false
-  
+
 }
 
 const listarMotoristaVeiculo = async (idMotorista:number, idVeiculo:number): Promise<any> => {

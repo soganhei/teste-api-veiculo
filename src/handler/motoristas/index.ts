@@ -55,19 +55,18 @@ const FindByid = async (req: Request, res: Response) => {
     res.status(StatusCodes.OK)
     res.send(response)
   } catch (error) {
-    let message
-
+    const message = {error:''}
   
     switch (error) {
       case errors.ErrorListarMotorista:
-        message = `Error para listar motorista ${idMotorista}`
+        message.error = `Error para listar motorista ${idMotorista}`
         break
       default:
         break
     }
 
     res.status(StatusCodes.BAD_REQUEST)
-    res.send({ message })
+    res.send(message)
   }
 }
 
@@ -79,21 +78,22 @@ const Create = async (req: Request, res: Response) => {
     res.status(StatusCodes.CREATED)
     res.send(response)
   } catch (error) {
-    let message
+
+    const message = {error:''}
 
     switch (error) {
       case errors.ErrorMotoristaCadastrado:
-        message = `Motorista ${payload.nome} já cadastrado`
+        message.error = `Motorista ${payload.nome} já cadastrado`
         break
       case errors.ErrorCadastrarMotorista:
-        message = `Erro para cadatrar motorista ${payload.nome}`
+        message.error = `Erro para cadatrar motorista ${payload.nome}`
         break
       default:
         break
     }
 
     res.status(StatusCodes.BAD_REQUEST)
-    res.send({ message })
+    res.send(message)
   }
 }
 
@@ -107,18 +107,19 @@ const Update = async (req: Request, res: Response) => {
     res.status(StatusCodes.OK)
     res.send(payload)
   } catch (error) {
-    let message
+    
+    const message = {error:''}
 
     switch (error) {
       case errors.ErrorAtualizarMotorista:
-        message = `Error para atualizar motorista ${payload.nome}`
+        message.error = `Error para atualizar motorista ${payload.nome}`
         break
       default:
         break
     }
 
     res.status(StatusCodes.BAD_REQUEST)
-    res.send({ message })
+    res.send(message)
   }
 }
 
@@ -133,21 +134,22 @@ const Delete = async (req: Request, res: Response) => {
     res.send(null)
 
   } catch (error) {
-    let message
+    
+    const message = {error:''}
 
     switch (error) {
       case errors.ErrorMotoristaRelacionado:
-        message = `Erro para deletar motorista ${idMotorista}. Contem saídas vinculadas!`
+        message.error = `Erro para deletar motorista ${idMotorista}. Contem saídas vinculadas!`
         break
       case errors.ErrorDeletarMotorista:
-        message = `Erro para deletar motorista ${idMotorista}`
+        message.error = `Erro para deletar motorista ${idMotorista}`
         break
       default:
         break
     }
 
     res.status(StatusCodes.BAD_REQUEST)
-    res.send({ message })
+    res.send(message)
   }
 }
 

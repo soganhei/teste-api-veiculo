@@ -8,7 +8,7 @@ import app from '../'
 
 describe('Acitons Motoristas',()=>{
 
-    const id = Math.floor(new Date().getTime() / 1000)
+    const id = (Math.floor(new Date().getTime() / 1000))
 
     const payload: IMotoristas = {
         id, 

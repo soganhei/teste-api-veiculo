@@ -33,10 +33,9 @@ const Find = async (params?: IParams): Promise<IMotoristas[]> => {
 const FindByid = async (id: number): Promise<IMotoristas> => {
 
   try {
-    
-    const response = await db.Findbyid(id)
-    const item: IMotoristas = response
-    return item
+     
+    const response: IMotoristas = await db.Findbyid(id)
+    return response
 
   } catch (error) {
       throw errors.ErrorListarMotorista        
@@ -45,24 +44,25 @@ const FindByid = async (id: number): Promise<IMotoristas> => {
 }
 
 const Create = async (payload: IMotoristas): Promise<IMotoristas> => {
-  
-  const isNome = await IsNome(payload.nome)
-  if (isNome) {
-    throw errors.ErrorMotoristaCadastrado
-  }
-
-  const id = Math.floor(new Date().getTime() / 1000)
-
-  payload.id = id
-  payload.dataCriacao = new Date()
-
-  payload.key = KEY
-
+   
   try {
+
+    const isNome = await IsNome(payload.nome)
+    if (isNome) {
+      throw errors.ErrorMotoristaCadastrado
+    }
+
+    const id = Math.floor(new Date().getTime() / 1000)
+
+    payload.id = id
+    payload.dataCriacao = new Date()
+
+    payload.key = KEY
+
     await db.Create(payload)
     return payload
   } catch (error) {
-    throw errors.ErrorCadastrarMotorista
+     throw error
   } 
 
 }
@@ -72,19 +72,17 @@ const Update = async (
   id: number
 ): Promise<IMotoristas> => {
 
-  let response = await db.Findbyid(id)
-  if(response instanceof Error){
-      throw errors.ErrorListarMotorista
+  try {
+    
+    const response = await db.Findbyid(id)
+    const data = { ...response, nome: payload.nome }
+
+    await db.Update(id, data)
+    return data
+  } catch (error) {
+      throw error
   }
-
-  payload = { ...response, nome: payload.nome }
-
-  response = await db.Update(id, payload)
-  if (response instanceof Error) {
-    throw errors.ErrorAtualizarMotorista
-  }
-
-  return payload
+  
 }
 
 const Delete = async (idMotorista: number): Promise<void> => {
@@ -114,7 +112,7 @@ const IsNome = async (nome: string): Promise<boolean> => {
 
   if (items > 0) return true
   return false
-  
+
 }
 
 const services: IMotoristasServices = {
