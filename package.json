@@ -4,9 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest ./src --verbose",
+    "test": "jest ./src --verbose --notify",
     "dev": "nodemon --watch './src' --exec 'sucrase-node ./src' -e ts",
-    "build": "tsc"
+    "build": "tsc", 
+    "lint:fix":""
   },
   "keywords": [],
   "author": "",

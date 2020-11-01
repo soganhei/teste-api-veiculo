@@ -1,34 +1,31 @@
-import express = require("express")
-  
-const app = express();
+import express = require('express')
 
-app.disable('x-powered-by');
-app.use(express.json());
+const app = express()
+
+app.use(express.json())
 
 import Services from '../services'
 
 import Motoristas from './motoristas'
 import Veiculos from './veiculos'
 import Saidas from './saidas'
-  
- 
 
 const motoristas = Motoristas.NewHandler({
-    MotoristasServices:Services.MotoristasServices, 
-    SaidasServices: Services.SaidasServices, 
+  MotoristasServices: Services.MotoristasServices,
+  SaidasServices: Services.SaidasServices,
 })
 app.use(motoristas)
 
 const veiculos = Veiculos.NewHandler({
-    VeiculosServices:Services.VeiculosServices,  
+  VeiculosServices: Services.VeiculosServices,
 })
 app.use(veiculos)
 
 const saidas = Saidas.NewHandler({
-    SaidasServices: Services.SaidasServices,
-    VeiculosServices:Services.VeiculosServices, 
-    MotoristasServices:Services.MotoristasServices, 
+  SaidasServices: Services.SaidasServices,
+  VeiculosServices: Services.VeiculosServices,
+  MotoristasServices: Services.MotoristasServices,
 })
 app.use(saidas)
-  
+
 export default app

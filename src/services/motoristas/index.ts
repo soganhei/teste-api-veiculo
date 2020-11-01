@@ -1,4 +1,3 @@
-
 import db from '../db'
 
 import { IMotoristasServices, IMotoristas } from '../../schemas'
@@ -7,106 +6,107 @@ import SaidasServices from '../saidas'
 import errors from './errors'
 
 interface IParams {
-    nome?:string
+  nome?: string
 }
 
-const KEY = 'motoristas'
- 
+export const KEY = 'motoristas'
 
-const Find = async (params?:IParams): Promise<IMotoristas[]> => {
+const Find = async (params?: IParams): Promise<IMotoristas[]> => {
+  const motoristas: IMotoristas[] = await db.Find(KEY)
 
-    const motoristas: IMotoristas[] = await db.Find(KEY)
+  const items: IMotoristas[] = []
 
-    const items: IMotoristas[] = []
+  motoristas.forEach((item) => {
 
-    motoristas.forEach((item) =>{
+    const nome = item.nome.toUpperCase()
+    const pNome = `${params?.nome}`.toUpperCase()
 
-        const nome  = item.nome.toUpperCase()
-        const pNome = `${params?.nome}`.toUpperCase()
-
-        if(nome.indexOf(pNome) !== -1){
-            items.push(item)
-        } 
-    })
-
-    if(items.length > 0) return items
-
-    return motoristas 
-}
-
-const FindByid = async (id:number): Promise<IMotoristas> => {
-
-    const response = await db.Findbyid(id)
-    if(response instanceof Error){
-        throw errors.ErrorListarMotorista
+    if (nome.indexOf(pNome) !== -1) {
+      items.push(item)
     }
 
-    const item: IMotoristas = response
-    return item
+  })
+
+  if (items.length > 0 || params?.nome !== undefined) return items
+
+  return motoristas
 }
 
-const Create = async (payload:IMotoristas): Promise<IMotoristas> =>{
+const FindByid = async (id: number): Promise<IMotoristas> => {
 
-    const isNome = await IsNome(payload.nome)
-    if(isNome){
-        throw  errors.ErrorMotoristaCadastrado    
-    }
- 
-    const id = Math.floor(new Date().getTime() / 1000)
-         
-    payload.id = id
-    payload.dataCriacao =  new Date()
-  
-    payload.key = KEY
- 
-    const response = await db.Create(payload)
-    if(response instanceof Error){
-        throw  errors.ErrorCadastrarMotorista    
-    }
-    return payload
-    
+  const response = await db.Findbyid(id)
+   
+  if (response instanceof Error) {
+    throw errors.ErrorListarMotorista
+  }
+
+  const item: IMotoristas = response
+  return item
 }
 
-const Update = async (payload:IMotoristas,id:number): Promise<IMotoristas> =>{
+const Create = async (payload: IMotoristas): Promise<IMotoristas> => {
+  const isNome = await IsNome(payload.nome)
+  if (isNome) {
+    throw errors.ErrorMotoristaCadastrado
+  }
 
-  const item: IMotoristas = await db.Findbyid(id)
-  
-  payload = { ...item, nome: payload.nome }
+  const id = Math.floor(new Date().getTime() / 1000)
 
-  const response =  await db.Update(id, payload)
+  payload.id = id
+  payload.dataCriacao = new Date()
+
+  payload.key = KEY
+
+  const response = await db.Create(payload)
+  if (response instanceof Error) {
+    throw errors.ErrorCadastrarMotorista
+  }
+  return payload
+}
+
+const Update = async (
+  payload: IMotoristas,
+  id: number
+): Promise<IMotoristas> => {
+
+  let response = await db.Findbyid(id)
   if(response instanceof Error){
+      throw errors.ErrorListarMotorista
+  }
+
+  payload = { ...response, nome: payload.nome }
+
+  response = await db.Update(id, payload)
+  if (response instanceof Error) {
     throw errors.ErrorAtualizarMotorista
   }
 
   return payload
-
 }
 
-const Delete = async (idMotorista:number): Promise<void> => {
+const Delete = async (idMotorista: number): Promise<void> => {
 
-    const isMotorista = SaidasServices.ForenKey('idMotorista', idMotorista)
-    if(isMotorista){
-        throw errors.ErrorMotoristaRelacionado
-    }
+  const isMotorista = await SaidasServices.ForenKey('idMotorista', idMotorista)
+   
+  if (isMotorista) {
+    throw errors.ErrorMotoristaRelacionado
+  }
 
-    const response = await db.Delete(idMotorista)
-    if(response instanceof Error){
-        throw errors.ErrorDeletarMotorista
-    }
-     
+  const response = await db.Delete(idMotorista)
+  if (response instanceof Error) {
+    throw errors.ErrorDeletarMotorista
+  }
 }
 
-const IsNome = async (nome:string): Promise<boolean> =>{
-    
-    const motoristas: IMotoristas[] = await db.Find(KEY)
+const IsNome = async (nome: string): Promise<boolean> => {
+  const motoristas: IMotoristas[] = await db.Find(KEY)
 
-    const items = motoristas.filter(({ nome }) => nome)
+  const items = motoristas.filter( item => item.nome == nome)
 
-     
-    if(items.length > 0){
-        return true
-    }    
-    return false
+  if (items.length > 0) {
+    return true
+  }
+  return false
 }
 
 const services: IMotoristasServices = {
@@ -115,7 +115,7 @@ const services: IMotoristasServices = {
   Create,
   Delete,
   FindByid,
-  IsNome
+  IsNome,
 }
 
 export default services
