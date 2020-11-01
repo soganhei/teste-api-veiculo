@@ -1,6 +1,6 @@
 import Services,{KEY} from './'
 import errors from './errors'
-import {IMotoristas,IVeiculos, ISaidas, ISaidasForm} from '../../schemas'
+import {ISaidasForm} from '../../schemas'
 
 import db from '../db'
 
@@ -22,7 +22,7 @@ describe('Saídas',()=>{
 
       const payload:ISaidasForm = {
            id, 
-           key: KEY, 
+           key: KEY+'_test',
            idMotorista, 
            idVeiculo, 
            dataCriacao: new Date(), 
@@ -49,6 +49,18 @@ describe('Saídas',()=>{
            
           const response = await Services.FindByid(id)
           expect([response.idMotorista, response.idVeiculo]).toEqual([idMotorista, idVeiculo])
+      })
+
+      it('Deletar saida', async ()=>{
+
+         await Services.Delete(id)
+
+         try {
+            await Services.FindByid(id)   
+         } catch (error) {             
+            expect(error).toBe('Não encontrado')
+         }
+
       })
 
 })

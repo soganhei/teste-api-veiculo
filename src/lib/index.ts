@@ -6,7 +6,7 @@ export const FormatDate = (date: Date): string => {
 //Entrada YYYY-MM-DD
 //Retorna DD/MM/YYYY
 export const FormatDatePtBr = (date: string): string => {
-  if (date == undefined) {
+  if (date === '') {
     return ''
   }
   const d = date.split('-')

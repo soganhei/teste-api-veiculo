@@ -4,12 +4,12 @@ import {IMotoristas} from '../../schemas'
   
 describe('Motoristas', ()=>{
   
-       const id = (Math.floor(new Date().getTime() / 1000)) + 10
+       const id = (Math.floor(new Date().getTime() / 1000))
 
     
        const payload: IMotoristas = {
            id, 
-           key: KEY,
+           key: KEY+'_test',
            nome:'Marcus',
            dataCriacao: new Date()
        }
@@ -20,6 +20,7 @@ describe('Motoristas', ()=>{
         expect(response.id).toBe(payload.id)
 
       })
+ 
 
       it('Validar motorista cadastrado',async ()=>{
 
@@ -43,12 +44,7 @@ describe('Motoristas', ()=>{
              
       })
 
-      it('Listar motorista byid', async ()=>{
- 
-        const response = await Services.FindByid(id)
-        expect(response).toEqual(payload)
-
-      })
+      
 
       it('Buscar motorista por nome',async ()=>{
 
@@ -61,29 +57,35 @@ describe('Motoristas', ()=>{
              
       })
 
-      
+      it('Listar motorista byid', async ()=>{
+ 
+       
+        const response = await Services.FindByid(id)
+        expect(response).toEqual(payload)
+
+      })
 
       it('Atualizar motorista byid', async ()=>{
  
-        /**await Services.Update({
+        await Services.Update({
             ...payload, 
             nome:'Marcus Antonio',
         },id)
 
         const response = await Services.FindByid(id)
-        expect(response.nome).toBe('Marcus Antonio') */
+        expect(response.nome).toBe('Marcus Antonio') 
 
       })
 
       it('Deletar motorista',async ()=>{
 
-            /**await Services.Delete(id)
+            await Services.Delete(id)
 
             try {
               await Services.FindByid(id)
             } catch (error) {
               expect(error).toBe(errors.ErrorListarMotorista)
-            } */
+            } 
       })
 
 })

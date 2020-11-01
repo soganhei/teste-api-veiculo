@@ -19,6 +19,7 @@ export interface IHandler {
 let handler: IHandler
 
 const NewHandler = (h: IHandler) => {
+  
   handler = h
 
   const router = express()
