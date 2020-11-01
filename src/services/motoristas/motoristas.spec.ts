@@ -3,11 +3,12 @@ import errors from './errors'
 import {IMotoristas} from '../../schemas'
 import db from '../db'
 
-const id = Math.floor(new Date().getTime() / 1000)
- 
+
 
 describe('Motoristas', ()=>{
-     
+  
+       const id = Math.floor(new Date().getTime() / 1000)
+
        const payload: IMotoristas = {
            id, 
            key: KEY,
@@ -55,7 +56,7 @@ describe('Motoristas', ()=>{
              
       })
 
-      it('Listar motorista by id', async ()=>{
+      it('Listar motorista byid', async ()=>{
 
         await db.Create(payload)
 

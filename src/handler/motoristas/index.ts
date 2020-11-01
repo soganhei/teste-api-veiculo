@@ -3,15 +3,13 @@ import { StatusCodes } from 'http-status-codes'
 
 import {
   IMotoristasServices,
-  IMotoristas,
-  ISaidasServices,
+  IMotoristas,  
 } from '../../schemas'
 
 import errors from '../../services/motoristas/errors'
 
 export interface IHandler {
-  MotoristasServices: IMotoristasServices
-  SaidasServices: ISaidasServices
+  MotoristasServices: IMotoristasServices   
 }
 
 let handler: IHandler
@@ -50,15 +48,16 @@ const Find = async (req: Request, res: Response) => {
 const FindByid = async (req: Request, res: Response) => {
   
   const idMotorista = parseInt(req.params.id)
-
+  
   try {
     const response = await handler.MotoristasServices.FindByid(idMotorista)
-     
+    
     res.status(StatusCodes.OK)
     res.send(response)
   } catch (error) {
     let message
 
+  
     switch (error) {
       case errors.ErrorListarMotorista:
         message = `Error para listar motorista ${idMotorista}`

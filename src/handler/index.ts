@@ -11,8 +11,7 @@ import Veiculos from './veiculos'
 import Saidas from './saidas'
 
 const motoristas = Motoristas.NewHandler({
-  MotoristasServices: Services.MotoristasServices,
-  SaidasServices: Services.SaidasServices,
+  MotoristasServices: Services.MotoristasServices,   
 })
 app.use(motoristas)
 
