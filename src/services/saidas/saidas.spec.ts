@@ -1,9 +1,9 @@
-import database from '../db'
+import database,{Storage} from '../db'
  
 import app, { KEY } from './'
 import { ISaidasForm } from '../../schemas'
 
-const db = database()
+const db = database({...Storage()})
 const Services = app(db)
 
 describe('Saídas', () => {
@@ -26,7 +26,7 @@ describe('Saídas', () => {
     key: KEY + '_test',
     idMotorista,
     idVeiculo,
-    dataCriacao: new Date(),
+    dataCriacao: new Date().toString(),
     dataSaida: '2020-01-01',
     motivoSaida: 'xxx',
     dataEntrada: '2020-01-02',

@@ -36,7 +36,7 @@ const FindByid = (db: IDatabaseServices) => async (
 ): Promise<IMotoristas> => {
   try {
     const response: IMotoristas = await db.Findbyid(id)
-    return response
+    return {...response}
   } catch (error) {
     throw errors.ErrorListarMotorista
   }
@@ -54,7 +54,7 @@ const Create = (db: IDatabaseServices) => async (
     const id = Math.floor(new Date().getTime() / 1000)
 
     payload.id = id
-    payload.dataCriacao = new Date()
+    payload.dataCriacao = new Date().toString()
 
     payload.key = KEY
 

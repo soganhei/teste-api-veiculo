@@ -59,17 +59,19 @@ const ForenKey = (db: IDatabase) => async (
   return Object.values(db).some((item) => isfk(item, table, column, id))
 }
 
-export default () => {
+export const Storage = ():IDatabase =>{
+    return {} as IDatabase
+}
 
-  const db = {} as IDatabase
+export default (storage:IDatabase) => {
 
   const services: IDatabaseServices = {
-    Create: Create(db),
-    Find: Find(db),
-    Findbyid: Findbyid(db),
-    Update: Update(db),
-    Delete: Delete(db),
-    ForenKey: ForenKey(db),
+    Create: Create(storage),
+    Find: Find(storage),
+    Findbyid: Findbyid(storage),
+    Update: Update(storage),
+    Delete: Delete(storage),
+    ForenKey: ForenKey(storage),
   }
   return services
 }
