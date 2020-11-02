@@ -6,8 +6,8 @@
   "scripts": {
     "test": "jest ./src --verbose --notify",
     "dev": "nodemon --watch './src'  --exec 'sucrase-node ./src' -e ts",
-    "build": "tsc", 
-    "lint:fix":""
+    "build": "tsc",
+    "lint:fix": "prettier --write ./src"
   },
   "keywords": [],
   "author": "",

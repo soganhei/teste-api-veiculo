@@ -1,5 +1,3 @@
-describe('Actions Saídas',()=>{
-
-     it('POST Nova Saída',()=>{})
-      
+describe('Actions Saídas', () => {
+  it('POST Nova Saída', () => {})
 })

@@ -1,7 +1,7 @@
-import db from '../db'
+import { IDatabaseServices } from '../db'
 
 import { IMotoristasServices, IMotoristas } from '../../schemas'
-import SaidasServices from '../saidas'
+import { KEY as SaidasKey } from '../saidas'
 
 import errors from './errors'
 
@@ -11,43 +11,42 @@ interface IParams {
 
 export const KEY = 'motoristas'
 
-const Find = async (params?: IParams): Promise<IMotoristas[]> => {
+const Find = (db: IDatabaseServices) => async (
+  params?: IParams
+): Promise<IMotoristas[]> => {
   const motoristas: IMotoristas[] = await db.Find(KEY)
- 
-  const upperCase = (text:string) => text.toUpperCase()
- 
-  const search = Object.values(params || {}).map( value => upperCase(value) ).join('')
 
-  const searchNome = (item:IMotoristas) => {
+  const upperCase = (text: string) => text.toUpperCase()
 
+  const search = Object.values(params || {})
+    .map((value) => upperCase(value))
+    .join('')
+
+  const searchNome = (item: IMotoristas, search: string) => {
     const nome = upperCase(item.nome)
-    if (nome.indexOf(search) !== -1)  return item
-
+    if (nome.indexOf(search) !== -1) return item
   }
 
-  const items = motoristas.filter(searchNome)
+  const items = motoristas.filter((item) => searchNome(item, search))
   return items
-
 }
 
-const FindByid = async (id: number): Promise<IMotoristas> => {
-
+const FindByid = (db: IDatabaseServices) => async (
+  id: number
+): Promise<IMotoristas> => {
   try {
-     
     const response: IMotoristas = await db.Findbyid(id)
     return response
-
   } catch (error) {
-      throw errors.ErrorListarMotorista        
+    throw errors.ErrorListarMotorista
   }
- 
 }
 
-const Create = async (payload: IMotoristas): Promise<IMotoristas> => {
-   
+const Create = (db: IDatabaseServices) => async (
+  payload: IMotoristas
+): Promise<IMotoristas> => {
   try {
-
-    const isNome = await IsNome(payload.nome)
+    const isNome = await IsNome(db)(payload.nome)
     if (isNome) {
       throw errors.ErrorMotoristaCadastrado
     }
@@ -62,66 +61,57 @@ const Create = async (payload: IMotoristas): Promise<IMotoristas> => {
     await db.Create(payload)
     return payload
   } catch (error) {
-     throw error
-  } 
-
+    throw error
+  }
 }
 
-const Update = async (
+const Update = (db: IDatabaseServices) => async (
   payload: IMotoristas,
   id: number
 ): Promise<IMotoristas> => {
-
   try {
-    
-    const response = await db.Findbyid(id)
+    const response = await db.Findbyid(payload.id)
     const data = { ...response, nome: payload.nome }
 
     await db.Update(id, data)
     return data
   } catch (error) {
-      throw error
+    throw error
   }
-  
 }
 
-const Delete = async (idMotorista: number): Promise<void> => {
-
-  const isMotorista = await SaidasServices.ForenKey('idMotorista', idMotorista)
-   
-  if (isMotorista) {
-    throw errors.ErrorMotoristaRelacionado
-  }
-
+const Delete = (db: IDatabaseServices) => async (
+  idMotorista: number
+): Promise<void> => {
   try {
+    const isMotorista = await db.ForenKey(idMotorista, SaidasKey, 'idMotorista')
 
+    if (isMotorista) {
+      throw errors.ErrorMotoristaRelacionado
+    }
     await db.Delete(idMotorista)
-    
   } catch (error) {
     throw errors.ErrorDeletarMotorista
-    
-  } 
-  
+  }
 }
 
-const IsNome = async (nome: string): Promise<boolean> => {
+const IsNome = (db: IDatabaseServices) => async (
+  nome: string
+): Promise<boolean> => {
   const motoristas: IMotoristas[] = await db.Find(KEY)
 
-  const isNome = (item:IMotoristas) => item.nome === nome
-  const items  = motoristas.filter(isNome).length
-
-  if (items > 0) return true
-  return false
-
+  const isNome = (item: IMotoristas, nome: string) => item.nome === nome
+  return motoristas.some((item) => isNome(item, nome))
 }
 
-const services: IMotoristasServices = {
-  Find,
-  Update,
-  Create,
-  Delete,
-  FindByid,
-  IsNome,
+export default (db: IDatabaseServices): IMotoristasServices => {
+  const services = {
+    Find: Find(db),
+    Update: Update(db),
+    Create: Create(db),
+    Delete: Delete(db),
+    FindByid: FindByid(db),
+    IsNome: IsNome(db),
+  }
+  return services
 }
-
-export default services

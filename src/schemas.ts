@@ -78,6 +78,4 @@ export interface ISaidasServices {
   FindByid(id: number): Promise<ISaidas>
   Update(payload: ISaidasForm, id: number): Promise<ISaidasForm>
   Delete(id: number): Promise<void>
-
-  ForenKey(key: keyof ISaidasForm, value: any): Promise<boolean>
 }

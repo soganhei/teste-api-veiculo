@@ -1,62 +1,45 @@
-import express, { Request, Response } from 'express'
+import { Request, Response, IRouter } from 'express'
 import { StatusCodes } from 'http-status-codes'
 
 import { FormatDate } from '../../lib'
 
-import {
-  IMotoristasServices,
-  IVeiculosServices,
-  ISaidasForm,
-  ISaidasServices,
-} from '../../schemas'
+import { ISaidasForm, ISaidasServices } from '../../schemas'
 
 export interface IHandler {
-  MotoristasServices: IMotoristasServices
-  VeiculosServices: IVeiculosServices
   SaidasServices: ISaidasServices
 }
 
-let handler: IHandler
-
-const NewHandler = (h: IHandler) => {
-  
-  handler = h
-
-  const router = express()
+const NewHandler = (handler: IHandler) => (router: IRouter) => {
   router
-    .post('/saidas', Create)
-    .get('/saidas', Find)
-    .get('/saidas/:id', FindByid)
-    .put('/saidas/:id', Update)
-    .delete('/saidas/:id', Delete)
+    .post('/saidas', Create(handler))
+    .get('/saidas', Find(handler))
+    .get('/saidas/:id', FindByid(handler))
+    .put('/saidas/:id', Update(handler))
+    .delete('/saidas/:id', Delete(handler))
   return router
 }
 
-const Find = async (req: Request, res: Response) => {
+const Find = (handler: IHandler) => async (req: Request, res: Response) => {
   try {
     const response = await handler.SaidasServices.Find()
-    res.status(StatusCodes.OK)
-    res.send(response)
+    httpRespose(res, StatusCodes.OK, response)
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST)
-    res.send({ message: error.message })
+    httpRespose(res, StatusCodes.BAD_REQUEST, error)
   }
 }
 
-const FindByid = async (req: Request, res: Response) => {
+const FindByid = (handler: IHandler) => async (req: Request, res: Response) => {
   const idMotorista = parseInt(req.params.id)
 
   try {
     const response = await handler.SaidasServices.FindByid(idMotorista)
-    res.status(StatusCodes.OK)
-    res.send(response)
+    httpRespose(res, StatusCodes.OK, response)
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST)
-    res.send({ message: error.message })
+    httpRespose(res, StatusCodes.BAD_REQUEST, { error })
   }
 }
 
-const Create = async (req: Request, res: Response) => {
+const Create = (handler: IHandler) => async (req: Request, res: Response) => {
   const payload: ISaidasForm = req.body
 
   const date = FormatDate(new Date())
@@ -67,12 +50,11 @@ const Create = async (req: Request, res: Response) => {
     res.status(StatusCodes.CREATED)
     res.send(response)
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST)
-    res.send({ message: error.message })
+    httpRespose(res, StatusCodes.BAD_REQUEST, { error })
   }
 }
 
-const Update = async (req: Request, res: Response) => {
+const Update = (handler: IHandler) => async (req: Request, res: Response) => {
   const idMotorista = parseInt(req.params.id)
 
   const payload: ISaidasForm = req.body
@@ -82,22 +64,22 @@ const Update = async (req: Request, res: Response) => {
     res.status(StatusCodes.OK)
     res.send(payload)
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST)
-    res.send({ message: error.message })
+    httpRespose(res, StatusCodes.BAD_REQUEST, { error })
   }
 }
 
-const Delete = async (req: Request, res: Response) => {
+const Delete = (handler: IHandler) => async (req: Request, res: Response) => {
   const idSaida = parseInt(req.params.id)
 
   try {
     await handler.SaidasServices.Delete(idSaida)
-    res.status(StatusCodes.NO_CONTENT)
-    res.send(null)
+    httpRespose(res, StatusCodes.NO_CONTENT, {})
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST)
-    res.send({ message: error.message })
+    httpRespose(res, StatusCodes.BAD_REQUEST, { error })
   }
 }
+
+const httpRespose = (res: Response, status: number, body: {}) =>
+  res.status(status).send(body)
 
 export default { NewHandler }
