@@ -1,10 +1,10 @@
-import database from '../db'
+import database,{Storage} from '../db'
 
 import app, { KEY } from './'
 import errors from './errors'
 import { IVeiculos } from '../../schemas'
 
-const db = database()
+const db = database({...Storage()})
 const Services = app(db)
 
 describe('Veículos', () => {
@@ -16,7 +16,7 @@ describe('Veículos', () => {
     marca: 'BMW',
     cor: 'Branca',
     placa: 'XXX-XX2',
-    dataCriacao: new Date(),
+    dataCriacao: new Date().toString(),
   }
 
   it('Criar novo veículo', async () => {

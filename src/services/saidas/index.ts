@@ -25,8 +25,8 @@ const Find = (db: IDatabaseServices) => async (): Promise<ISaidas[]> => {
 
     return {
       ...item,
-      veiculo,
-      motorista,
+      veiculo:  {...veiculo},
+      motorista:{...motorista},
       dataSaida: FormatDatePtBr(dataSaida),
       dataEntrada: FormatDatePtBr(dataEntrada || ''),
     }
@@ -50,8 +50,8 @@ const FindByid = (db: IDatabaseServices) => async (
 
     return {
       ...response,
-      motorista,
-      veiculo,
+      motorista:{...motorista},
+      veiculo:{...veiculo},
     }
   } catch (error) {
     throw error
@@ -81,7 +81,7 @@ const Create = (db: IDatabaseServices) => async (
     const id = Math.floor(new Date().getTime() / 1000)
 
     payload.id = id
-    payload.dataCriacao = new Date()
+    payload.dataCriacao = new Date().toString()
     payload.dataSaida = FormatDate(new Date())
     payload.dataEntrada = ''
 
@@ -134,8 +134,8 @@ const listarMotoristaVeiculo = (db: IDatabaseServices) => async (
   const veiculo: IVeiculos = await db.Findbyid(idVeiculo)
 
   return {
-    motorista,
-    veiculo,
+    motorista:{...motorista},
+    veiculo:{...veiculo},
   }
 }
 

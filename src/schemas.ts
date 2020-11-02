@@ -1,7 +1,7 @@
 export interface IMotoristas {
   id: number
   nome: string
-  dataCriacao: Date
+  dataCriacao: string
   key: string
 }
 
@@ -10,7 +10,7 @@ export interface IVeiculos {
   marca: string
   placa: string
   cor: string
-  dataCriacao?: Date
+  dataCriacao?: string
   key: string
 }
 
@@ -21,7 +21,7 @@ export interface ISaidas {
   dataSaida: string
   dataEntrada?: string
   motivoSaida?: string
-  dataCriacao: Date
+  dataCriacao: string
   veiculo: IVeiculos
   motorista: IMotoristas
 }
@@ -33,7 +33,7 @@ export interface ISaidasForm {
   dataSaida: string
   dataEntrada: string
   motivoSaida: string
-  dataCriacao: Date
+  dataCriacao: string
   key: string
 }
 

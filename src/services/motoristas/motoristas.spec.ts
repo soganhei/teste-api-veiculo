@@ -1,21 +1,22 @@
-import database from '../db'
+import database,{Storage} from '../db'
 
 import errors from './errors'
 import { IMotoristas } from '../../schemas'
 
 import app, { KEY } from './'
 
-const db = database()
+const db = database({...Storage()})
 const Services = app(db)
 
 describe('Motoristas', () => {
   const id = Math.floor(new Date().getTime() / 1000)
+   
 
   const payload: IMotoristas = {
     id,
     key: KEY + '_test',
     nome: 'Marcus',
-    dataCriacao: new Date(),
+    dataCriacao: new Date().toString(),
   }
 
   it('Criar novo motorista', async () => {

@@ -1,10 +1,10 @@
-import database, { IDatabase } from './db'
+import database, { Storage } from './db'
 
 import Motoristas from './motoristas'
 import Veiculos from './veiculos'
 import Saidas from './saidas'
 
-const db = database()
+const db = database({...Storage()})
 
 const services = {
   MotoristasServices: Motoristas(db),
