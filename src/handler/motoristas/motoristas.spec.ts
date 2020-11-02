@@ -1,30 +1,49 @@
+import express = require('express')
+  
 import request from 'supertest'
 import { StatusCodes } from 'http-status-codes'
+import database,{ IDatabase } from '../../services/db'
 
 import { IMotoristas } from '../../schemas'
-import app from '../'
+import handler from './'
 
-describe('Acitons Motoristas', () => {
+const storagedb = {} as IDatabase
+
+import Services from '../../services/motoristas'
+const handlers = handler.NewHandler({
+  MotoristasServices: Services(database(storagedb)), 
+})
+
+const route = express()
+route.use(express.json())
+const app = handlers(route)
+
+const setPayload = () =>{
+
   const id = Math.floor(new Date().getTime() / 1000)
-
+  
   const payload: IMotoristas = {
     id,
     key: 'motoristas',
     nome: 'Marcus',
-    dataCriacao: new Date(),
+    dataCriacao: new Date().toDateString(),
   }
+  return payload
+}
+
+describe('Acitons Motoristas', () => {
 
   it('POST Criar novo motoristas', (done) => {
     request(app)
       .post('/motoristas')
-      .send(payload)
+      .send(setPayload())
       .expect(StatusCodes.CREATED, done)
   })
 
   it('POST Validar motorista cadastrado', (done) => {
     request(app)
       .post('/motoristas')
-      .send(payload)
+      .send(setPayload())
       .expect(StatusCodes.BAD_REQUEST, done)
   })
 
@@ -59,9 +78,12 @@ describe('Acitons Motoristas', () => {
       })
   })
 
-  it('GET Listar motorista byid', async (done) => {
+  it('GET Listar motorista byid',  (done) => {
+
+    const payload = setPayload()
+
     request(app)
-      .get(`/motoristas/${id}`)
+      .get(`/motoristas/${payload.id}`)
       .expect(StatusCodes.OK)
       .then((response) => {
         const { body } = response
@@ -71,20 +93,26 @@ describe('Acitons Motoristas', () => {
       })
   })
 
-  it('PUT Atualizar motorista byid', (done) => {
+  it('PUT Atualizar motorista byid',  (done) => {
+
+    const payload = setPayload()
+
     const data = {
       ...payload,
       nome: 'Marcus Antonio',
     }
     request(app)
-      .put(`/motoristas/${id}`)
+      .put(`/motoristas/${payload.id}`)
       .send(data)
       .expect(StatusCodes.OK, done)
   })
 
-  it('Validar nome atualizado', (done) => {
+  it('Validar nome atualizado',  (done) => {
+
+    const payload = setPayload()
+
     request(app)
-      .get(`/motoristas/${id}`)
+      .get(`/motoristas/${payload.id}`)
       .expect(StatusCodes.OK)
       .then((response) => {
         const data: IMotoristas = response.body
@@ -93,6 +121,9 @@ describe('Acitons Motoristas', () => {
       })
   })
   it('DELETE Deletar motorista byid', (done) => {
+
+    const {id} = setPayload()
     request(app).del(`/motoristas/${id}`).expect(StatusCodes.NO_CONTENT, done)
+
   })
 })

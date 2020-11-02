@@ -1,4 +1,4 @@
-import { IDatabase, IDatabaseServices } from '../db'
+import { IDatabaseServices } from '../db'
 
 import { IVeiculos, IVeiculosServices } from '../../schemas'
 
@@ -37,7 +37,7 @@ const FindByid = (db: IDatabaseServices) => async (
 ): Promise<IVeiculos> => {
   try {
     const response: IVeiculos = await db.Findbyid(id)
-    return {...response}
+    return Object.assign({},response)
   } catch (error) {
     throw errors.ErrorListarVeiculo
   }

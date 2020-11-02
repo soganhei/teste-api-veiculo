@@ -16,23 +16,18 @@ export const KEY = 'saidas'
 const Find = (db: IDatabaseServices) => async (): Promise<ISaidas[]> => {
   const saidas: ISaidasForm[] = await db.Find(KEY)
 
-  const listSaidas = async (item: ISaidas | any): Promise<ISaidas> => {
-    const { idMotorista, idVeiculo, dataSaida, dataEntrada } = item
+  const listSaidas = async (item: ISaidas | any, db: IDatabaseServices): Promise<ISaidas> => {
+    
     const { motorista, veiculo } = await listarMotoristaVeiculo(db)(
-      idMotorista,
-      idVeiculo
+      item.idMotorista,
+      item.idVeiculo
     )
-
-    return {
-      ...item,
-      veiculo:  {...veiculo},
-      motorista:{...motorista},
-      dataSaida: FormatDatePtBr(dataSaida),
-      dataEntrada: FormatDatePtBr(dataEntrada || ''),
-    }
+    const mv    = {veiculo: veiculo, motorista: motorista}
+    const date  = {dataSaida: FormatDatePtBr(item.dataSaida), dataEntrada: FormatDatePtBr(item.dataEntrada || '')}
+    return Object.assign({},item,mv,date)
   }
 
-  const promises = saidas.map(listSaidas)
+  const promises = saidas.map( item => listSaidas(item,db) )
 
   const items = await Promise.all(promises)
   return items
@@ -47,12 +42,7 @@ const FindByid = (db: IDatabaseServices) => async (
       response.idMotorista,
       response.idVeiculo
     )
-
-    return {
-      ...response,
-      motorista:{...motorista},
-      veiculo:{...veiculo},
-    }
+    return  Object.assign({},response,{motorista: motorista, veiculo: veiculo})
   } catch (error) {
     throw error
   }
@@ -143,14 +133,20 @@ const validarVMNaoCadastrado = (db: IDatabaseServices) => async (
   idMotorista: number,
   idVeiculo: number
 ): Promise<boolean> => {
-  const motorista = db.Findbyid(idMotorista)
-  const veiculo = db.Findbyid(idVeiculo)
-
+  
   try {
-    Promise.all([motorista, veiculo])
+
+    const motorista = await  db.Findbyid(idMotorista)
+    const veiculo = await db.Findbyid(idVeiculo)
+
+    const isItem = (item:any) => Object.values(item).length === 0
+
+    if(isItem(motorista) && isItem(veiculo)) return true
     return false
+      
+    
   } catch (error) {
-    return true
+    throw error
   }
 }
 
@@ -163,7 +159,7 @@ const validarSaidaCadastrada = (db: IDatabaseServices) => async (
   const motorista = await db.ForenKey(idMotorista, KEY, 'idMotorista')
   const veiculo = await db.ForenKey(idVeiculo, KEY, 'idVeiculo')
   const data = await db.ForenKey(dataSaida, KEY, 'dataSaida')
-
+ 
   if (!motorista && !veiculo && !data) {
     return false
   }

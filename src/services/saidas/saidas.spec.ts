@@ -1,38 +1,49 @@
-import database,{Storage} from '../db'
+import database,{IDatabase} from '../db'
  
 import app, { KEY } from './'
 import { ISaidasForm } from '../../schemas'
 
-const db = database({...Storage()})
+const storagedb = {} as IDatabase
+const db = database(storagedb)
+ 
 const Services = app(db)
 
-describe('Saídas', () => {
+
+const setPayload = () =>{
+
   const id = Math.floor(new Date().getTime() / 1000)
-  const idMotorista = id + 1
-  const idVeiculo = id + 2
-
-  db.Create({
-    key: 'motoristas',
-    id: idMotorista,
-  })
-
-  db.Create({
-    key: 'veiculos',
-    id: idVeiculo,
-  })
 
   const payload: ISaidasForm = {
     id,
-    key: KEY + '_test',
-    idMotorista,
-    idVeiculo,
+    key: KEY,
+    idMotorista: id + 1,
+    idVeiculo: id + 2,
     dataCriacao: new Date().toString(),
     dataSaida: '2020-01-01',
     motivoSaida: 'xxx',
     dataEntrada: '2020-01-02',
   }
+  return payload
+
+}
+
+describe('Saídas', () => {
+   
 
   it('Nova saída', async () => {
+
+    const payload = setPayload()
+
+    db.Create({
+      key: 'motoristas',
+      id: payload.idMotorista,
+    })
+  
+    db.Create({
+      key: 'veiculos',
+      id: payload.idVeiculo,
+    })
+
     const response = await Services.Create(payload)
     expect(response).toEqual(payload)
   })
@@ -43,6 +54,9 @@ describe('Saídas', () => {
   })
 
   it('Listar saída byid', async () => {
+
+    const {id,idMotorista,idVeiculo} = setPayload()
+
     const response = await Services.FindByid(id)
     expect([response.idMotorista, response.idVeiculo]).toEqual([
       idMotorista,
@@ -51,6 +65,9 @@ describe('Saídas', () => {
   })
 
   it('Deletar saida', async () => {
+
+    const {id} = setPayload()
+
     await Services.Delete(id)
 
     try {

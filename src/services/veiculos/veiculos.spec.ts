@@ -7,19 +7,27 @@ import { IVeiculos } from '../../schemas'
 const db = database({...Storage()})
 const Services = app(db)
 
-describe('Veículos', () => {
-  const id = Math.floor(new Date().getTime() / 1000)
+const setPayload = () =>{
 
+  const id = Math.floor(new Date().getTime() / 1000)
+  
   const payload: IVeiculos = {
     id,
-    key: KEY + '_test',
+    key: KEY,
     marca: 'BMW',
     cor: 'Branca',
     placa: 'XXX-XX2',
     dataCriacao: new Date().toString(),
   }
+  return payload
+
+}
+
+describe('Veículos', () => {
 
   it('Criar novo veículo', async () => {
+
+    const payload = setPayload()
     const response = await Services.Create(payload)
     expect(response).toEqual(payload)
   })
@@ -56,23 +64,32 @@ describe('Veículos', () => {
   })
 
   it('Listar veículo by id', async () => {
-    const response = await Services.FindByid(id)
+
+    const payload = setPayload()
+
+    const response = await Services.FindByid(payload.id)
     expect(response).toEqual(payload)
   })
   it('Atualizar veículo', async () => {
+
+    const payload = setPayload()
+
     await Services.Update(
       {
         ...payload,
         placa: 'XXX-2',
       },
-      id
+      payload.id
     )
 
-    const response = await Services.FindByid(id)
+    const response = await Services.FindByid(payload.id)
     expect('XXX-2').toBe(response.placa)
   })
 
   it('Deletar veículo', async () => {
+
+    const {id} = setPayload()
+
     await Services.Delete(id)
 
     try {

@@ -1,25 +1,35 @@
-import database,{Storage} from '../db'
+import database,{IDatabase} from '../db'
 
 import errors from './errors'
 import { IMotoristas } from '../../schemas'
 
 import app, { KEY } from './'
 
-const db = database({...Storage()})
+const storagedb = {} as IDatabase
+const db = database(storagedb)
+
 const Services = app(db)
 
-describe('Motoristas', () => {
+const setPyload = () =>{
+
   const id = Math.floor(new Date().getTime() / 1000)
    
-
   const payload: IMotoristas = {
     id,
-    key: KEY + '_test',
+    key: KEY,
     nome: 'Marcus',
     dataCriacao: new Date().toString(),
   }
+  return payload
+}
 
+describe('Motoristas', () => {
+  
+  
   it('Criar novo motorista', async () => {
+    
+    const payload = setPyload()
+    
     const response = await Services.Create(payload)
     expect(response.id).toBe(payload.id)
   })
@@ -48,24 +58,27 @@ describe('Motoristas', () => {
   })
 
   it('Listar motorista byid', async () => {
-    const response = await Services.FindByid(id)
+
+    const payload = setPyload()
+
+    const response = await Services.FindByid(payload.id)
     expect(response).toEqual(payload)
   })
 
   it('Atualizar motorista byid', async () => {
-    await Services.Update(
-      {
-        ...payload,
-        nome: 'Marcus Antonio',
-      },
-      id
-    )
 
-    const response = await Services.FindByid(id)
+    const payload = setPyload()
+
+    await Services.Update({ ...payload, nome: 'Marcus Antonio', },payload.id )
+
+    const response = await Services.FindByid(payload.id)
     expect(response.nome).toBe('Marcus Antonio')
   })
 
   it('Deletar motorista', async () => {
+
+    const {id} = setPyload()
+
     await Services.Delete(id)
 
     try {

@@ -36,7 +36,7 @@ const FindByid = (db: IDatabaseServices) => async (
 ): Promise<IMotoristas> => {
   try {
     const response: IMotoristas = await db.Findbyid(id)
-    return {...response}
+    return Object.assign({},response)
   } catch (error) {
     throw errors.ErrorListarMotorista
   }
