@@ -1,156 +1,112 @@
-import express, { Request, Response } from 'express'
+import { IRouter, Request, Response } from 'express'
 import { StatusCodes } from 'http-status-codes'
 
-import {
-  IMotoristasServices,
-  IMotoristas,  
-} from '../../schemas'
+import { IMotoristasServices, IMotoristas } from '../../schemas'
 
 import errors from '../../services/motoristas/errors'
 
 export interface IHandler {
-  MotoristasServices: IMotoristasServices   
+  MotoristasServices: IMotoristasServices
 }
 
-let handler: IHandler
-
-const NewHandler = (h: IHandler) => {
-  handler = h
-
-  const router = express()
- 
+const NewHandler = (handler: IHandler) => (router: IRouter) => {
   router
-    .post('/motoristas', Create)
-    .get('/motoristas', Find)
-    .get('/motoristas/:id', FindByid)
-    .put('/motoristas/:id', Update)
-    .delete('/motoristas/:id', Delete)
+    .post('/motoristas', Create(handler))
+    .get('/motoristas', Find(handler))
+    .get('/motoristas/:id', FindByid(handler))
+    .put('/motoristas/:id', Update(handler))
+    .delete('/motoristas/:id', Delete(handler))
 
-   
   return router
 }
 
-const Find = async (req: Request, res: Response) => {
-  const query = req.query
-
-  try {
-    const response = await handler.MotoristasServices.Find(query)
-    res.status(StatusCodes.OK)
-    res.send(response)
-  } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST)
-    res.send({
-      message: 'Erro para listar motoristas',
-    })
-  }
-}
-
-const FindByid = async (req: Request, res: Response) => {
-  
-  const idMotorista = parseInt(req.params.id)
-  
-  try {
-    const response = await handler.MotoristasServices.FindByid(idMotorista)
-    
-    res.status(StatusCodes.OK)
-    res.send(response)
-  } catch (error) {
-    const message = {error:''}
-  
-    switch (error) {
-      case errors.ErrorListarMotorista:
-        message.error = `Error para listar motorista ${idMotorista}`
-        break
-      default:
-        break
-    }
-
-    res.status(StatusCodes.BAD_REQUEST)
-    res.send(message)
-  }
-}
-
-const Create = async (req: Request, res: Response) => {
+const Create = (handler: IHandler) => async (req: Request, res: Response) => {
   const payload: IMotoristas = req.body
 
   try {
     const response = await handler.MotoristasServices.Create(payload)
-    res.status(StatusCodes.CREATED)
-    res.send(response)
+    return httpRespose(res, StatusCodes.CREATED, response)
   } catch (error) {
-
-    const message = {error:''}
-
     switch (error) {
       case errors.ErrorMotoristaCadastrado:
-        message.error = `Motorista ${payload.nome} já cadastrado`
-        break
+        return httpRespose(res, StatusCodes.BAD_REQUEST, {
+          error: `Motorista ${payload.nome} já cadastrado`,
+        })
       case errors.ErrorCadastrarMotorista:
-        message.error = `Erro para cadatrar motorista ${payload.nome}`
-        break
-      default:
-        break
+        return httpRespose(res, StatusCodes.BAD_REQUEST, {
+          error: `Erro para cadatrar motorista ${payload.nome}`,
+        })
     }
-
-    res.status(StatusCodes.BAD_REQUEST)
-    res.send(message)
   }
 }
 
-const Update = async (req: Request, res: Response) => {
+const Find = (handler: IHandler) => async (req: Request, res: Response) => {
+  try {
+    const query = req.query
+    const response = await handler.MotoristasServices.Find(query)
+    return httpRespose(res, StatusCodes.OK, response)
+  } catch (error) {
+    return httpRespose(res, StatusCodes.BAD_REQUEST, {
+      error: 'Erro para listar motoristas',
+    })
+  }
+}
+
+const FindByid = (handler: IHandler) => async (req: Request, res: Response) => {
   const idMotorista = parseInt(req.params.id)
 
+  try {
+    const response = await handler.MotoristasServices.FindByid(idMotorista)
+    return httpRespose(res, StatusCodes.OK, response)
+  } catch (error) {
+    switch (error) {
+      case errors.ErrorListarMotorista:
+        return httpRespose(res, StatusCodes.BAD_REQUEST, {
+          error: `Error para listar motorista ${idMotorista}`,
+        })
+    }
+  }
+}
+
+const Update = (handler: IHandler) => async (req: Request, res: Response) => {
+  const idMotorista = parseInt(req.params.id)
   const payload: IMotoristas = req.body
 
   try {
     await handler.MotoristasServices.Update(payload, idMotorista)
-    res.status(StatusCodes.OK)
-    res.send(payload)
+    return httpRespose(res, StatusCodes.OK, payload)
   } catch (error) {
-    
-    const message = {error:''}
-
     switch (error) {
       case errors.ErrorAtualizarMotorista:
-        message.error = `Error para atualizar motorista ${payload.nome}`
-        break
-      default:
-        break
+        return httpRespose(res, StatusCodes.BAD_REQUEST, {
+          error: `Error para atualizar motorista ${payload.nome}`,
+        })
     }
-
-    res.status(StatusCodes.BAD_REQUEST)
-    res.send(message)
   }
 }
 
-const Delete = async (req: Request, res: Response) => {
-  
+const Delete = (handler: IHandler) => async (req: Request, res: Response) => {
   const idMotorista = parseInt(req.params.id)
   try {
-    
     await handler.MotoristasServices.Delete(idMotorista)
-
-    res.status(StatusCodes.NO_CONTENT)
-    res.send(null)
-
+    return httpRespose(res, StatusCodes.NO_CONTENT, {})
   } catch (error) {
-    
-    const message = {error:''}
-
     switch (error) {
       case errors.ErrorMotoristaRelacionado:
-        message.error = `Erro para deletar motorista ${idMotorista}. Contem saídas vinculadas!`
-        break
-      case errors.ErrorDeletarMotorista:
-        message.error = `Erro para deletar motorista ${idMotorista}`
-        break
-      default:
-        break
-    }
+        return httpRespose(res, StatusCodes.BAD_REQUEST, {
+          error: `Erro para deletar motorista ${idMotorista}. Contem saídas vinculadas!`,
+        })
 
-    res.status(StatusCodes.BAD_REQUEST)
-    res.send(message)
+      case errors.ErrorDeletarMotorista:
+        httpRespose(res, StatusCodes.BAD_REQUEST, {
+          error: `Erro para deletar motorista ${idMotorista}`,
+        })
+        return
+    }
   }
 }
+
+const httpRespose = (res: Response, status: number, body: {}) =>
+  res.status(status).send(body)
 
 export default { NewHandler }
