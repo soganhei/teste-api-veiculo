@@ -10,6 +10,7 @@ import {
 import { FormatDateUs, FormatDatePtBr } from '../../util'
 
 import errors from './errors'
+import { Interface } from 'readline'
 
 export const KEY = 'saidas'
 
@@ -60,7 +61,7 @@ const Create = (db: IDatabaseServices) => async (
   payload: ISaidasForm
 ): Promise<ISaidasForm> => {
   try {
-    const isMV = await validarVMNaoCadastrado(db)(
+    const isMV = await VMNaoCadastrado(db)(
       payload.idMotorista,
       payload.idVeiculo
     )
@@ -68,7 +69,7 @@ const Create = (db: IDatabaseServices) => async (
       throw errors.ErrorVMNaoCadastrado
     }
 
-    const isSaida = await validarSaidaCadastrada(db)(
+    const isSaida = await SaidaCadastrada(db)(
       payload.idMotorista,
       payload.idVeiculo
     )
@@ -132,13 +133,13 @@ const listarMotoristaVeiculo = (db: IDatabaseServices) => async (
   idMotorista: number,
   idVeiculo: number
 ): Promise<any> => {
-  const motorista: IMotoristas = await db.Findbyid(idMotorista)
-  const veiculo: IVeiculos = await db.Findbyid(idVeiculo)
-
+  
+  const {motorista,veiculo} = await ForeignKey(db)(idMotorista,idVeiculo)
   return Object.assign({}, { motorista: motorista, veiculo: veiculo })
+
 }
 
-const validarVMNaoCadastrado = (db: IDatabaseServices) => async (
+const VMNaoCadastrado = (db: IDatabaseServices) => async (
   idMotorista: number,
   idVeiculo: number
 ): Promise<boolean> => {
@@ -155,20 +156,34 @@ const validarVMNaoCadastrado = (db: IDatabaseServices) => async (
   }
 }
 
-const validarSaidaCadastrada = (db: IDatabaseServices) => async (
+const SaidaCadastrada = (db: IDatabaseServices) => async (
   idMotorista: number,
   idVeiculo: number
 ): Promise<boolean> => {
   const dataSaida = FormatDateUs(new Date())
 
-  const data = await db.ForenKey(dataSaida, KEY, 'dataSaida')
-  const motorista = await db.ForenKey(idMotorista, KEY, 'idMotorista')
-  const veiculo = await db.ForenKey(idVeiculo, KEY, 'idVeiculo')
+  const items = {dataSaida, idMotorista, idVeiculo}
+  
+  return Object.entries(items)
+  .map( item  => ValidarSaidaCadastrada(db,KEY,item[0],item[1]) )
+  .some( item => !item) 
+   
+}
+  
+export const ValidarSaidaCadastrada = async (db:IDatabaseServices, key:string, column:string, id:any): Promise<boolean> =>{
+  return await db.ForenKey(id, key, column) 
+}
 
-  if (!motorista && !veiculo && !data) {
-    return false
+export const ForeignKey = (db:IDatabaseServices) => async (idMotorista:number, idVeiculo:number) =>{
+
+  const motorista: IMotoristas = await db.Findbyid(idMotorista)
+  const veiculo: IVeiculos     = await db.Findbyid(idVeiculo)
+
+  return {
+    motorista:motorista, 
+    veiculo: veiculo, 
   }
-  return true
+
 }
 
 export default (db: IDatabaseServices): ISaidasServices => {

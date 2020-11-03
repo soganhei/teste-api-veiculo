@@ -1,7 +1,7 @@
 import database, { IDatabase } from '../db'
 
 import app, { KEY } from './'
-import { ISaidasForm } from '../../schemas'
+import { ISaidasForm, IMotoristas, IVeiculos } from '../../schemas'
 
 const storagedb = {} as IDatabase
 const db = database(storagedb)
@@ -26,6 +26,7 @@ const setPayload = () => {
 
 describe('Saídas', () => {
   it('Nova saída', async () => {
+    
     const payload = setPayload()
 
     db.Create({
@@ -67,5 +68,6 @@ describe('Saídas', () => {
     } catch (error) {
       expect(error).toBe('Não encontrado')
     }
-  })
+  }) 
+
 })
