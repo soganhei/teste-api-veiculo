@@ -101,7 +101,7 @@ const Update = (db: IDatabaseServices) => async (
 ): Promise<ISaidasForm> => {
   try {
     const response: ISaidasForm = await db.Findbyid(id)
-    const data = { ...response, dataEntrada: payload.dataEntrada }
+    const data = Object.assign({},response,{dataEntrada: payload.dataEntrada})
 
     const atualizar = await db.Update(id, data)
     if (!atualizar) {

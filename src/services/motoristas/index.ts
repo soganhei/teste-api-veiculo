@@ -74,7 +74,7 @@ const Update = (db: IDatabaseServices) => async (
 ): Promise<IMotoristas> => {
   try {
     const response = await db.Findbyid(payload.id)
-    const data = { ...response, nome: payload.nome }
+    const data = Object.assign({},response,{nome: payload.nome})
 
     const atualizar = await db.Update(id, data)
     if (!atualizar) {
