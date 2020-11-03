@@ -15,19 +15,9 @@ const Find = (db: IDatabaseServices) => async (
   params?: IParams
 ): Promise<IMotoristas[]> => {
   const motoristas: IMotoristas[] = await db.Find(KEY)
-
-  const upperCase = (text: string) => text.toUpperCase()
-
-  const search = Object.values(params || {})
-    .map((value) => upperCase(value))
-    .join('')
-
-  const searchNome = (item: IMotoristas, search: string) => {
-    const nome = upperCase(item.nome)
-    if (nome.indexOf(search) !== -1) return item
-  }
-
-  const items = motoristas.filter((item) => searchNome(item, search))
+ 
+  const paramsUrl = getUrlParams(params || {})
+  const items = motoristas.filter((item) => searchNome(toUpperCase, paramsUrl, item))
   return items
 }
 
@@ -100,7 +90,7 @@ const Delete = (db: IDatabaseServices) => async (
       throw errors.ErrorDeletarMotorista
     }
   } catch (error) {
-    throw errors.ErrorDeletarMotorista
+    throw error
   }
 }
 
@@ -112,6 +102,12 @@ const IsNome = (db: IDatabaseServices) => async (
   const isNome = (item: IMotoristas, nome: string) => item.nome === nome
   return motoristas.some((item) => isNome(item, nome))
 }
+
+export const toUpperCase = (text: string) => text.toUpperCase()
+
+export const getUrlParams = (params:IParams) => Object.values(params).map((value) => toUpperCase(value)).join('')
+
+export const searchNome = (fn:(text:string)=> string,urlParam: string,item: IMotoristas, ) => (fn(item.nome).indexOf(urlParam) !== -1)
 
 export default (db: IDatabaseServices): IMotoristasServices => {
   const services = {

@@ -35,7 +35,6 @@ const Update = (db: IDatabase) => async (
   id: number | any,
   value: any
 ): Promise<boolean> => {
-  delete db[id]
   db[id] = value
   return Object.is(db[id], value)
 }
