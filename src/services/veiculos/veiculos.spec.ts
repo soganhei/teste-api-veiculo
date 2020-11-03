@@ -1,4 +1,4 @@
-import database,{IDatabase} from '../db'
+import database, { IDatabase } from '../db'
 
 import app, { KEY } from './'
 import errors from './errors'
@@ -9,10 +9,9 @@ const db = database(storagedb)
 
 const Services = app(db)
 
-const setPayload = () =>{
-
+const setPayload = () => {
   const id = Math.floor(new Date().getTime() / 1000)
-  
+
   const payload: IVeiculos = {
     id,
     key: KEY,
@@ -22,13 +21,10 @@ const setPayload = () =>{
     dataCriacao: new Date().toString(),
   }
   return payload
-
 }
 
 describe('Veículos', () => {
-
   it('Criar novo veículo', async () => {
-
     const payload = setPayload()
     const response = await Services.Create(payload)
     expect(response).toEqual(payload)
@@ -66,14 +62,12 @@ describe('Veículos', () => {
   })
 
   it('Listar veículo by id', async () => {
-
     const payload = setPayload()
 
     const response = await Services.FindByid(payload.id)
     expect(response).toEqual(payload)
   })
   it('Atualizar veículo', async () => {
-
     const payload = setPayload()
 
     await Services.Update(
@@ -89,8 +83,7 @@ describe('Veículos', () => {
   })
 
   it('Deletar veículo', async () => {
-
-    const {id} = setPayload()
+    const { id } = setPayload()
 
     await Services.Delete(id)
 

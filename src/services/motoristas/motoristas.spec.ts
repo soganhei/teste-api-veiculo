@@ -1,4 +1,4 @@
-import database,{IDatabase} from '../db'
+import database, { IDatabase } from '../db'
 
 import errors from './errors'
 import { IMotoristas } from '../../schemas'
@@ -10,10 +10,9 @@ const db = database(storagedb)
 
 const Services = app(db)
 
-const setPyload = () =>{
-
+const setPyload = () => {
   const id = Math.floor(new Date().getTime() / 1000)
-   
+
   const payload: IMotoristas = {
     id,
     key: KEY,
@@ -24,12 +23,9 @@ const setPyload = () =>{
 }
 
 describe('Motoristas', () => {
-  
-  
   it('Criar novo motorista', async () => {
-    
     const payload = setPyload()
-    
+
     const response = await Services.Create(payload)
     expect(response.id).toBe(payload.id)
   })
@@ -58,7 +54,6 @@ describe('Motoristas', () => {
   })
 
   it('Listar motorista byid', async () => {
-
     const payload = setPyload()
 
     const response = await Services.FindByid(payload.id)
@@ -66,18 +61,16 @@ describe('Motoristas', () => {
   })
 
   it('Atualizar motorista byid', async () => {
-
     const payload = setPyload()
 
-    await Services.Update({ ...payload, nome: 'Marcus Antonio', },payload.id )
+    await Services.Update({ ...payload, nome: 'Marcus Antonio' }, payload.id)
 
     const response = await Services.FindByid(payload.id)
     expect(response.nome).toBe('Marcus Antonio')
   })
 
   it('Deletar motorista', async () => {
-
-    const {id} = setPyload()
+    const { id } = setPyload()
 
     await Services.Delete(id)
 

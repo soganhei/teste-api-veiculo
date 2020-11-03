@@ -29,9 +29,8 @@ const Find = (handler: IHandler) => async (req: Request, res: Response) => {
 }
 
 const FindByid = (handler: IHandler) => async (req: Request, res: Response) => {
-  const idMotorista = parseInt(req.params.id)
-
   try {
+    const idMotorista = parseInt(req.params.id)
     const response = await handler.SaidasServices.FindByid(idMotorista)
     httpRespose(res, StatusCodes.OK, response)
   } catch (error) {
@@ -40,38 +39,30 @@ const FindByid = (handler: IHandler) => async (req: Request, res: Response) => {
 }
 
 const Create = (handler: IHandler) => async (req: Request, res: Response) => {
-  const payload: ISaidasForm = {...req.body}
-
-  const date = FormatDate(new Date())
-
   try {
+    const payload: ISaidasForm = { ...req.body }
     const response = await handler.SaidasServices.Create(payload)
-
-    res.status(StatusCodes.CREATED)
-    res.send(response)
+    httpRespose(res, StatusCodes.CREATED, response)
   } catch (error) {
     httpRespose(res, StatusCodes.BAD_REQUEST, { error })
   }
 }
 
 const Update = (handler: IHandler) => async (req: Request, res: Response) => {
-  const idMotorista = parseInt(req.params.id)
-
-  const payload: ISaidasForm = {...req.body}
-
   try {
+    const idMotorista = parseInt(req.params.id)
+    const payload: ISaidasForm = { ...req.body }
+
     const response = await handler.SaidasServices.Update(payload, idMotorista)
-    res.status(StatusCodes.OK)
-    res.send(payload)
+    httpRespose(res, StatusCodes.OK, response)
   } catch (error) {
     httpRespose(res, StatusCodes.BAD_REQUEST, { error })
   }
 }
 
 const Delete = (handler: IHandler) => async (req: Request, res: Response) => {
-  const idSaida = parseInt(req.params.id)
-
   try {
+    const idSaida = parseInt(req.params.id)
     await handler.SaidasServices.Delete(idSaida)
     httpRespose(res, StatusCodes.NO_CONTENT, {})
   } catch (error) {

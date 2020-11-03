@@ -21,8 +21,7 @@ const NewHandler = (handler: IHandler) => (router: IRouter) => {
 }
 
 const Create = (handler: IHandler) => async (req: Request, res: Response) => {
-  const payload: IMotoristas = {...req.body}
-
+  const payload: IMotoristas = { ...req.body }
   try {
     const response = await handler.MotoristasServices.Create(payload)
     return httpRespose(res, StatusCodes.CREATED, response)
@@ -42,7 +41,7 @@ const Create = (handler: IHandler) => async (req: Request, res: Response) => {
 
 const Find = (handler: IHandler) => async (req: Request, res: Response) => {
   try {
-    const query = req.query
+    const query = { ...req.query }
     const response = await handler.MotoristasServices.Find(query)
     return httpRespose(res, StatusCodes.OK, response)
   } catch (error) {
@@ -69,10 +68,10 @@ const FindByid = (handler: IHandler) => async (req: Request, res: Response) => {
 }
 
 const Update = (handler: IHandler) => async (req: Request, res: Response) => {
-  const idMotorista = parseInt(req.params.id)
-  const payload: IMotoristas = req.body
+  const payload: IMotoristas = { ...req.body }
 
   try {
+    const idMotorista = parseInt(req.params.id)
     await handler.MotoristasServices.Update(payload, idMotorista)
     return httpRespose(res, StatusCodes.OK, payload)
   } catch (error) {

@@ -1,5 +1,5 @@
-import database,{Storage} from './db'
-const db = database({...Storage()})
+import database, { Storage } from './db'
+const db = database({ ...Storage() })
 
 describe('Database key/value', () => {
   it('Criar registro', async () => {

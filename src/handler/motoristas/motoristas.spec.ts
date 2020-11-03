@@ -1,8 +1,8 @@
 import express = require('express')
-  
+
 import request from 'supertest'
 import { StatusCodes } from 'http-status-codes'
-import database,{ IDatabase } from '../../services/db'
+import database, { IDatabase } from '../../services/db'
 
 import { IMotoristas } from '../../schemas'
 import handler from './'
@@ -12,18 +12,16 @@ const db = database(storagedb)
 
 import MotoristasServices from '../../services/motoristas'
 const handlers = handler.NewHandler({
-  MotoristasServices: MotoristasServices(db), 
+  MotoristasServices: MotoristasServices(db),
 })
 
 const route = express()
 route.use(express.json())
 const app = handlers(route)
 
-
-const setPayload = () =>{
-
+const setPayload = () => {
   const id = Math.floor(new Date().getTime() / 1000)
-  
+
   const payload: IMotoristas = {
     id,
     key: 'motoristas',
@@ -34,7 +32,6 @@ const setPayload = () =>{
 }
 
 describe('Acitons Motoristas', () => {
-
   it('POST Criar novo motoristas', (done) => {
     request(app)
       .post('/motoristas')
@@ -80,8 +77,7 @@ describe('Acitons Motoristas', () => {
       })
   })
 
-  it('GET Listar motorista byid',  (done) => {
-
+  it('GET Listar motorista byid', (done) => {
     const payload = setPayload()
 
     request(app)
@@ -95,8 +91,7 @@ describe('Acitons Motoristas', () => {
       })
   })
 
-  it('PUT Atualizar motorista byid',  (done) => {
-
+  it('PUT Atualizar motorista byid', (done) => {
     const payload = setPayload()
 
     const data = {
@@ -109,8 +104,7 @@ describe('Acitons Motoristas', () => {
       .expect(StatusCodes.OK, done)
   })
 
-  it('Validar nome atualizado',  (done) => {
-
+  it('Validar nome atualizado', (done) => {
     const payload = setPayload()
 
     request(app)
@@ -123,9 +117,7 @@ describe('Acitons Motoristas', () => {
       })
   })
   it('DELETE Deletar motorista byid', (done) => {
-
-    const {id} = setPayload()
+    const { id } = setPayload()
     request(app).del(`/motoristas/${id}`).expect(StatusCodes.NO_CONTENT, done)
-
   })
 })

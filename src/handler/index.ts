@@ -20,7 +20,7 @@ const veiculos = Veiculos.NewHandler({
 veiculos(app)
 
 const saidas = Saidas.NewHandler({
-  SaidasServices: Services.SaidasServices,  
+  SaidasServices: Services.SaidasServices,
 })
 saidas(app)
 export default app

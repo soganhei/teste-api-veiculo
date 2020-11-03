@@ -37,7 +37,7 @@ const FindByid = (db: IDatabaseServices) => async (
 ): Promise<IVeiculos> => {
   try {
     const response: IVeiculos = await db.Findbyid(id)
-    return Object.assign({},response)
+    return Object.assign({}, response)
   } catch (error) {
     throw errors.ErrorListarVeiculo
   }
@@ -60,12 +60,12 @@ const Create = (db: IDatabaseServices) => async (
     payload.key = KEY
 
     const novo = await db.Create(payload)
-    if(!novo){
-       throw errors.ErrorCadastrarVeiculo
+    if (!novo) {
+      throw errors.ErrorCadastrarVeiculo
     }
     return payload
   } catch (error) {
-      throw error
+    throw error
   }
 }
 
@@ -81,10 +81,10 @@ const Update = (db: IDatabaseServices) => async (
       cor: payload.cor,
       placa: payload.placa,
     }
-    const data = Object.assign({},response,alterar)
+    const data = Object.assign({}, response, alterar)
 
     const atualizar = await db.Update(id, data)
-    if(!atualizar){
+    if (!atualizar) {
       throw errors.ErrorAtualizarVeiculo
     }
     return data
@@ -103,11 +103,11 @@ const Delete = (db: IDatabaseServices) => async (
     }
 
     const deletado = await db.Delete(idVeiculo)
-    if(!deletado){
+    if (!deletado) {
       throw errors.ErrorDeletarVeiculo
     }
   } catch (error) {
-    throw error 
+    throw error
   }
 }
 

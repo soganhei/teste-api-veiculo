@@ -1,15 +1,14 @@
-import database,{IDatabase} from '../db'
- 
+import database, { IDatabase } from '../db'
+
 import app, { KEY } from './'
 import { ISaidasForm } from '../../schemas'
 
 const storagedb = {} as IDatabase
 const db = database(storagedb)
- 
+
 const Services = app(db)
 
-const setPayload = () =>{
-
+const setPayload = () => {
   const id = Math.floor(new Date().getTime() / 1000)
 
   const payload: ISaidasForm = {
@@ -23,21 +22,17 @@ const setPayload = () =>{
     dataEntrada: '2020-01-02',
   }
   return payload
-
 }
 
 describe('Saídas', () => {
-   
-
   it('Nova saída', async () => {
-
     const payload = setPayload()
 
     db.Create({
       key: 'motoristas',
       id: payload.idMotorista,
     })
-  
+
     db.Create({
       key: 'veiculos',
       id: payload.idVeiculo,
@@ -53,8 +48,7 @@ describe('Saídas', () => {
   })
 
   it('Listar saída byid', async () => {
-
-    const {id,idMotorista,idVeiculo} = setPayload()
+    const { id, idMotorista, idVeiculo } = setPayload()
 
     const response = await Services.FindByid(id)
     expect([response.idMotorista, response.idVeiculo]).toEqual([
@@ -64,8 +58,7 @@ describe('Saídas', () => {
   })
 
   it('Deletar saida', async () => {
-
-    const {id} = setPayload()
+    const { id } = setPayload()
 
     await Services.Delete(id)
 

@@ -20,9 +20,8 @@ const NewHandler = (handler: IHandler) => (router: IRouter) => {
 }
 
 const Find = (handler: IHandler) => async (req: Request, res: Response) => {
-  const query = req.query
-
   try {
+    const query = { ...req.query }
     const response = await handler.VeiculosServices.Find(query)
     httpRespose(res, StatusCodes.OK, response)
   } catch (error) {
@@ -48,7 +47,7 @@ const FindByid = (handler: IHandler) => async (req: Request, res: Response) => {
 }
 
 const Create = (handler: IHandler) => async (req: Request, res: Response) => {
-  const payload: IVeiculos = {...req.body}
+  const payload: IVeiculos = { ...req.body }
 
   try {
     const response = await handler.VeiculosServices.Create(payload)
@@ -70,11 +69,10 @@ const Create = (handler: IHandler) => async (req: Request, res: Response) => {
 }
 
 const Update = (handler: IHandler) => async (req: Request, res: Response) => {
-  const idVeiculo = parseInt(req.params.id)
-
-  const payload: IVeiculos = {...req.body}
+  const payload: IVeiculos = { ...req.body }
 
   try {
+    const idVeiculo = parseInt(req.params.id)
     await handler.VeiculosServices.Update(payload, idVeiculo)
     httpRespose(res, StatusCodes.OK, payload)
   } catch (error) {
@@ -89,9 +87,8 @@ const Update = (handler: IHandler) => async (req: Request, res: Response) => {
 }
 
 const Delete = (handler: IHandler) => async (req: Request, res: Response) => {
-  const idVeiculo = parseInt(req.params.id)
-
   try {
+    const idVeiculo = parseInt(req.params.id)
     await handler.VeiculosServices.Delete(idVeiculo)
     httpRespose(res, StatusCodes.NO_CONTENT, {})
   } catch (error) {

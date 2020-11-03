@@ -35,7 +35,7 @@ export interface ISaidasForm {
   idMotorista: number
   dataEntrada: string
   motivoSaida: string
-} 
+}
 
 export interface IMotoristasServices {
   Create(payload: IMotoristas): Promise<IMotoristas>

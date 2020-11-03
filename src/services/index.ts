@@ -4,7 +4,7 @@ import Motoristas from './motoristas'
 import Veiculos from './veiculos'
 import Saidas from './saidas'
 
-const db = database({...Storage()})
+const db = database({ ...Storage() })
 
 const services = {
   MotoristasServices: Motoristas(db),
