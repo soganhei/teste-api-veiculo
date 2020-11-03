@@ -1,56 +1,41 @@
 export interface IMotoristas {
   id: number
+  key: string
   nome: string
   dataCriacao: string
-  key: string
 }
 
 export interface IVeiculos {
   id: number
+  key: string
+  cor: string
   marca: string
   placa: string
-  cor: string
-  dataCriacao?: string
-  key: string
+  dataCriacao: string
 }
 
 export interface ISaidas {
   id: number
-  idMotorista: number
-  idVeiculo: number
   dataSaida: string
-  dataEntrada?: string
-  motivoSaida?: string
-  dataCriacao: string
+  idVeiculo: number
   veiculo: IVeiculos
+  dataCriacao: string
+  idMotorista: number
+  motivoSaida?: string
+  dataEntrada?: string
   motorista: IMotoristas
 }
 
 export interface ISaidasForm {
   id: number
-  idMotorista: number
-  idVeiculo: number
+  key: string
+  dataCriacao: string
   dataSaida: string
+  idVeiculo: number
+  idMotorista: number
   dataEntrada: string
   motivoSaida: string
-  dataCriacao: string
-  key: string
-}
-
-export interface ILogs {
-  id?: number
-  key?: string
-  method?: string
-  error?: boolean
-  errorMessage?: string
-  payload?: any
-  dataCriacao?: Date
-  table: string
-}
-
-export interface ILogsServices {
-  Find(): ILogs[]
-}
+} 
 
 export interface IMotoristasServices {
   Create(payload: IMotoristas): Promise<IMotoristas>

@@ -58,7 +58,10 @@ const Create = (db: IDatabaseServices) => async (
 
     payload.key = KEY
 
-    await db.Create(payload)
+    const novo = await db.Create(payload)
+    if(!novo){
+       throw errors.ErrorCadastrarMotorista
+    }
     return payload
   } catch (error) {
     throw error
@@ -73,7 +76,10 @@ const Update = (db: IDatabaseServices) => async (
     const response = await db.Findbyid(payload.id)
     const data = { ...response, nome: payload.nome }
 
-    await db.Update(id, data)
+    const atualizar = await db.Update(id, data)
+    if(!atualizar){
+      throw errors.ErrorAtualizarMotorista
+    }
     return data
   } catch (error) {
     throw error
@@ -89,7 +95,10 @@ const Delete = (db: IDatabaseServices) => async (
     if (isMotorista) {
       throw errors.ErrorMotoristaRelacionado
     }
-    await db.Delete(idMotorista)
+    const deletado = await db.Delete(idMotorista)
+    if(!deletado){
+       throw errors.ErrorDeletarMotorista
+    }
   } catch (error) {
     throw errors.ErrorDeletarMotorista
   }

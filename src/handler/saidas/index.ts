@@ -40,7 +40,7 @@ const FindByid = (handler: IHandler) => async (req: Request, res: Response) => {
 }
 
 const Create = (handler: IHandler) => async (req: Request, res: Response) => {
-  const payload: ISaidasForm = req.body
+  const payload: ISaidasForm = {...req.body}
 
   const date = FormatDate(new Date())
 
@@ -57,7 +57,7 @@ const Create = (handler: IHandler) => async (req: Request, res: Response) => {
 const Update = (handler: IHandler) => async (req: Request, res: Response) => {
   const idMotorista = parseInt(req.params.id)
 
-  const payload: ISaidasForm = req.body
+  const payload: ISaidasForm = {...req.body}
 
   try {
     const response = await handler.SaidasServices.Update(payload, idMotorista)

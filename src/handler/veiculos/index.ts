@@ -48,7 +48,7 @@ const FindByid = (handler: IHandler) => async (req: Request, res: Response) => {
 }
 
 const Create = (handler: IHandler) => async (req: Request, res: Response) => {
-  const payload: IVeiculos = req.body
+  const payload: IVeiculos = {...req.body}
 
   try {
     const response = await handler.VeiculosServices.Create(payload)
@@ -72,7 +72,7 @@ const Create = (handler: IHandler) => async (req: Request, res: Response) => {
 const Update = (handler: IHandler) => async (req: Request, res: Response) => {
   const idVeiculo = parseInt(req.params.id)
 
-  const payload: IVeiculos = req.body
+  const payload: IVeiculos = {...req.body}
 
   try {
     await handler.VeiculosServices.Update(payload, idVeiculo)

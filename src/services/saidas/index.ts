@@ -22,9 +22,9 @@ const Find = (db: IDatabaseServices) => async (): Promise<ISaidas[]> => {
       item.idMotorista,
       item.idVeiculo
     )
-    const mv    = {veiculo: veiculo, motorista: motorista}
+    const veiculoMotorista    = {veiculo: veiculo, motorista: motorista}
     const date  = {dataSaida: FormatDatePtBr(item.dataSaida), dataEntrada: FormatDatePtBr(item.dataEntrada || '')}
-    return Object.assign({},item,mv,date)
+    return Object.assign({},item,veiculoMotorista,date)
   }
 
   const promises = saidas.map( item => listSaidas(item,db) )
@@ -77,17 +77,13 @@ const Create = (db: IDatabaseServices) => async (
 
     payload.key = KEY
 
-    await db.Create(payload)
+    const novo =  await db.Create(payload)
+    if(!novo){
+       throw errors.ErrorCadastrarSaida
+    }
     return payload
   } catch (error) {
-    switch (error) {
-      case errors.ErrorSaidaCadastrada:
-        throw error
-      case errors.ErrorVMNaoCadastrado:
-        throw error
-      default:
-        throw errors.ErrorCadastrarSaida
-    }
+    throw error 
   }
 }
 
@@ -99,10 +95,13 @@ const Update = (db: IDatabaseServices) => async (
     const response: ISaidasForm = await db.Findbyid(id)
     const data = { ...response, dataEntrada: payload.dataEntrada }
 
-    await db.Update(id, data)
+    const atualizar = await db.Update(id, data)
+    if(!atualizar){
+       throw errors.ErrorAtualizarSaida
+    }
     return data
   } catch (error) {
-    throw errors.ErrorCadastrarSaida
+    throw error
   }
 }
 
@@ -110,9 +109,12 @@ const Delete = (db: IDatabaseServices) => async (
   idMotorista: number
 ): Promise<void> => {
   try {
-    await db.Delete(idMotorista)
+    const deletado = await db.Delete(idMotorista)
+    if(!deletado){
+      throw errors.ErrorDeletarSaida
+    }
   } catch (error) {
-    throw errors.ErrorDeletarSaida
+      throw error
   }
 }
 
@@ -123,10 +125,7 @@ const listarMotoristaVeiculo = (db: IDatabaseServices) => async (
   const motorista: IMotoristas = await db.Findbyid(idMotorista)
   const veiculo: IVeiculos = await db.Findbyid(idVeiculo)
 
-  return {
-    motorista:{...motorista},
-    veiculo:{...veiculo},
-  }
+  return  Object.assign({},{motorista: motorista, veiculo: veiculo})
 }
 
 const validarVMNaoCadastrado = (db: IDatabaseServices) => async (
@@ -136,12 +135,12 @@ const validarVMNaoCadastrado = (db: IDatabaseServices) => async (
   
   try {
 
-    const motorista = await  db.Findbyid(idMotorista)
-    const veiculo = await db.Findbyid(idVeiculo)
+    const motorista = await db.Findbyid(idMotorista)
+    const veiculo   = await db.Findbyid(idVeiculo)
 
     const isItem = (item:any) => Object.values(item).length === 0
-
     if(isItem(motorista) && isItem(veiculo)) return true
+
     return false
       
     
@@ -156,9 +155,9 @@ const validarSaidaCadastrada = (db: IDatabaseServices) => async (
 ): Promise<boolean> => {
   const dataSaida = FormatDate(new Date())
 
+  const data      = await db.ForenKey(dataSaida, KEY, 'dataSaida')
   const motorista = await db.ForenKey(idMotorista, KEY, 'idMotorista')
-  const veiculo = await db.ForenKey(idVeiculo, KEY, 'idVeiculo')
-  const data = await db.ForenKey(dataSaida, KEY, 'dataSaida')
+  const veiculo   = await db.ForenKey(idVeiculo, KEY, 'idVeiculo')
  
   if (!motorista && !veiculo && !data) {
     return false

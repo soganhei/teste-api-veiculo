@@ -1,10 +1,12 @@
-import database,{Storage} from '../db'
+import database,{IDatabase} from '../db'
 
 import app, { KEY } from './'
 import errors from './errors'
 import { IVeiculos } from '../../schemas'
 
-const db = database({...Storage()})
+const storagedb = {} as IDatabase
+const db = database(storagedb)
+
 const Services = app(db)
 
 const setPayload = () =>{

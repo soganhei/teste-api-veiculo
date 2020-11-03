@@ -8,7 +8,6 @@ const db = database(storagedb)
  
 const Services = app(db)
 
-
 const setPayload = () =>{
 
   const id = Math.floor(new Date().getTime() / 1000)
@@ -16,11 +15,11 @@ const setPayload = () =>{
   const payload: ISaidasForm = {
     id,
     key: KEY,
+    motivoSaida: 'xxx',
     idMotorista: id + 1,
     idVeiculo: id + 2,
     dataCriacao: new Date().toString(),
     dataSaida: '2020-01-01',
-    motivoSaida: 'xxx',
     dataEntrada: '2020-01-02',
   }
   return payload

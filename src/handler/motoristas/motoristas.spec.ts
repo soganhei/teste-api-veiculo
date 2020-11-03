@@ -8,15 +8,17 @@ import { IMotoristas } from '../../schemas'
 import handler from './'
 
 const storagedb = {} as IDatabase
+const db = database(storagedb)
 
-import Services from '../../services/motoristas'
+import MotoristasServices from '../../services/motoristas'
 const handlers = handler.NewHandler({
-  MotoristasServices: Services(database(storagedb)), 
+  MotoristasServices: MotoristasServices(db), 
 })
 
 const route = express()
 route.use(express.json())
 const app = handlers(route)
+
 
 const setPayload = () =>{
 

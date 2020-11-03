@@ -59,15 +59,13 @@ const Create = (db: IDatabaseServices) => async (
 
     payload.key = KEY
 
-    await db.Create(payload)
+    const novo = await db.Create(payload)
+    if(!novo){
+       throw errors.ErrorCadastrarVeiculo
+    }
     return payload
   } catch (error) {
-    switch (error) {
-      case errors.ErrorVeiculoCadastrado:
-        throw error
-      default:
-        throw errors.ErrorCadastrarVeiculo
-    }
+      throw error
   }
 }
 
@@ -78,17 +76,20 @@ const Update = (db: IDatabaseServices) => async (
   try {
     const response = await db.Findbyid(id)
 
-    const data = {
-      ...response,
+    const alterar = {
       marca: payload.marca,
       cor: payload.cor,
       placa: payload.placa,
     }
+    const data = Object.assign({},response,alterar)
 
-    await db.Update(id, data)
+    const atualizar = await db.Update(id, data)
+    if(!atualizar){
+      throw errors.ErrorAtualizarVeiculo
+    }
     return data
   } catch (error) {
-    throw errors.ErrorAtualizarVeiculo
+    throw error
   }
 }
 
@@ -101,9 +102,12 @@ const Delete = (db: IDatabaseServices) => async (
       throw errors.ErrorVeiculoRelacionado
     }
 
-    await db.Delete(idVeiculo)
+    const deletado = await db.Delete(idVeiculo)
+    if(!deletado){
+      throw errors.ErrorDeletarVeiculo
+    }
   } catch (error) {
-    throw errors.ErrorDeletarVeiculo
+    throw error 
   }
 }
 

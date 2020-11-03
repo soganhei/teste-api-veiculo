@@ -21,7 +21,7 @@ const NewHandler = (handler: IHandler) => (router: IRouter) => {
 }
 
 const Create = (handler: IHandler) => async (req: Request, res: Response) => {
-  const payload: IMotoristas = req.body
+  const payload: IMotoristas = {...req.body}
 
   try {
     const response = await handler.MotoristasServices.Create(payload)
