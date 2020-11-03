@@ -7,7 +7,7 @@ import {
   ISaidasForm,
   ISaidasServices,
 } from '../../schemas'
-import { FormatDate, FormatDatePtBr } from '../../lib'
+import { FormatDateUs, FormatDatePtBr } from '../../util'
 
 import errors from './errors'
 
@@ -80,7 +80,7 @@ const Create = (db: IDatabaseServices) => async (
 
     payload.id = id
     payload.dataCriacao = new Date().toString()
-    payload.dataSaida = FormatDate(new Date())
+    payload.dataSaida = FormatDateUs(new Date())
     payload.dataEntrada = ''
 
     payload.key = KEY
@@ -101,7 +101,9 @@ const Update = (db: IDatabaseServices) => async (
 ): Promise<ISaidasForm> => {
   try {
     const response: ISaidasForm = await db.Findbyid(id)
-    const data = Object.assign({},response,{dataEntrada: payload.dataEntrada})
+    const data = Object.assign({}, response, {
+      dataEntrada: payload.dataEntrada,
+    })
 
     const atualizar = await db.Update(id, data)
     if (!atualizar) {
@@ -157,7 +159,7 @@ const validarSaidaCadastrada = (db: IDatabaseServices) => async (
   idMotorista: number,
   idVeiculo: number
 ): Promise<boolean> => {
-  const dataSaida = FormatDate(new Date())
+  const dataSaida = FormatDateUs(new Date())
 
   const data = await db.ForenKey(dataSaida, KEY, 'dataSaida')
   const motorista = await db.ForenKey(idMotorista, KEY, 'idMotorista')

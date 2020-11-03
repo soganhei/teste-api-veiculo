@@ -5,6 +5,8 @@ import { KEY as SaidasKey } from '../saidas'
 
 import errors from './errors'
 
+import { FormatUrlParams } from '../../util'
+
 interface IParams {
   nome?: string
 }
@@ -15,9 +17,17 @@ const Find = (db: IDatabaseServices) => async (
   params?: IParams
 ): Promise<IMotoristas[]> => {
   const motoristas: IMotoristas[] = await db.Find(KEY)
- 
-  const paramsUrl = getUrlParams(params || {})
-  const items = motoristas.filter((item) => searchNome(toUpperCase, paramsUrl, item))
+
+  const paramsUrl = FormatUrlParams(params || {})
+
+  const searchNome = (
+    fn: (item: any) => string,
+    search: string,
+    item: IMotoristas
+  ) => fn(item).indexOf(search) !== -1
+  const items = motoristas.filter((item) =>
+    searchNome(FormatUrlParams, paramsUrl, item)
+  )
   return items
 }
 
@@ -64,7 +74,7 @@ const Update = (db: IDatabaseServices) => async (
 ): Promise<IMotoristas> => {
   try {
     const response = await db.Findbyid(payload.id)
-    const data = Object.assign({},response,{nome: payload.nome})
+    const data = Object.assign({}, response, { nome: payload.nome })
 
     const atualizar = await db.Update(id, data)
     if (!atualizar) {
@@ -102,12 +112,6 @@ const IsNome = (db: IDatabaseServices) => async (
   const isNome = (item: IMotoristas, nome: string) => item.nome === nome
   return motoristas.some((item) => isNome(item, nome))
 }
-
-export const toUpperCase = (text: string) => text.toUpperCase()
-
-export const getUrlParams = (params:IParams) => Object.values(params).map((value) => toUpperCase(value)).join('')
-
-export const searchNome = (fn:(text:string)=> string,urlParam: string,item: IMotoristas, ) => (fn(item.nome).indexOf(urlParam) !== -1)
 
 export default (db: IDatabaseServices): IMotoristasServices => {
   const services = {

@@ -5,6 +5,8 @@ import { IVeiculos, IVeiculosServices } from '../../schemas'
 import { KEY as SaidasKey } from '../saidas'
 import errors from './errors'
 
+import { FormatUrlParams } from '../../util'
+
 interface IParams {
   placa?: string
   marca?: string
@@ -18,17 +20,16 @@ const Find = (db: IDatabaseServices) => async (
 ): Promise<IVeiculos[]> => {
   const veiculos: IVeiculos[] = await db.Find(KEY)
 
-  const upperCase = (text: string) => text.toUpperCase()
+  const search = FormatUrlParams(params || {})
 
-  const search = Object.values(params || {})
-    .map((value) => upperCase(value))
-    .join('|')
-
-  const searchVeiculo = (item: IVeiculos, search: string) => {
-    const label = upperCase(`${item.placa}|${item.marca}|${item.cor}`)
-    if (label.indexOf(search) !== -1) return item
-  }
-  const items = veiculos.filter((item) => searchVeiculo(item, search))
+  const searchVeiculo = (
+    fn: (item: any) => string,
+    search: string,
+    item: IVeiculos
+  ) => fn(item).indexOf(search) !== -1
+  const items = veiculos.filter((item) =>
+    searchVeiculo(FormatUrlParams, search, item)
+  )
   return items
 }
 
