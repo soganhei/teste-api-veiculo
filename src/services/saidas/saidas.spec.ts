@@ -1,7 +1,8 @@
 import database, { IDatabase } from '../db'
 
 import app, { KEY } from './'
-import { ISaidasForm, IMotoristas, IVeiculos } from '../../schemas'
+import errors from './errors'
+import { ISaidasForm } from '../../schemas'
 
 const storagedb = {} as IDatabase
 const db = database(storagedb)
@@ -25,6 +26,7 @@ const setPayload = () => {
 }
 
 describe('Saídas', () => {
+ 
   it('Nova saída', async () => {
     
     const payload = setPayload()
@@ -43,6 +45,18 @@ describe('Saídas', () => {
     expect(response).toEqual(payload)
   })
 
+  it('Validar Veículo e Motorista não cadastrada', async () => {
+    
+    const payload = setPayload()
+ 
+    try {
+        await Services.Create(payload)
+    } catch (error) {
+      expect(error).toBe(errors.ErrorVMNaoCadastrado)
+    }
+     
+  })
+ 
   it('Listar saídas', async () => {
     const response = await Services.Find()
     expect(response.length).toBe(1)

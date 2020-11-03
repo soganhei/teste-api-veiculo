@@ -44,6 +44,7 @@ const FindByid = (db: IDatabaseServices) => async (
 ): Promise<ISaidas> => {
   try {
     const response: ISaidasForm = await db.Findbyid(id)
+    
     const { motorista, veiculo } = await listarMotoristaVeiculo(db)(
       response.idMotorista,
       response.idVeiculo
@@ -144,13 +145,13 @@ const VMNaoCadastrado = (db: IDatabaseServices) => async (
   idVeiculo: number
 ): Promise<boolean> => {
   try {
-    const motorista = await db.Findbyid(idMotorista)
-    const veiculo = await db.Findbyid(idVeiculo)
 
-    const isItem = (item: any) => Object.values(item).length === 0
-    if (isItem(motorista) && isItem(veiculo)) return true
-
-    return false
+    const items = {idMotorista, idVeiculo}
+   
+    return Object.values(items)
+    .map( id => IsByid(db,id) )
+    .some( item => !item )   
+     
   } catch (error) {
     throw error
   }
@@ -168,6 +169,12 @@ const SaidaCadastrada = (db: IDatabaseServices) => async (
   .map( item  => ValidarSaidaCadastrada(db,KEY,item[0],item[1]) )
   .some( item => !item) 
    
+}
+
+export const IsByid = async (db:IDatabaseServices, id:number): Promise<boolean> =>{
+  
+  const response =  await db.Findbyid(id)
+  return Object.values(response).length === 0
 }
   
 export const ValidarSaidaCadastrada = async (db:IDatabaseServices, key:string, column:string, id:any): Promise<boolean> =>{
