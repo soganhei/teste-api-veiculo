@@ -7,31 +7,34 @@ import database, { IDatabase } from '../../services/db'
 import { IMotoristas } from '../../schemas'
 import handler from './'
 
-const storagedb = {} as IDatabase
-const db = database(storagedb)
-
 import MotoristasServices from '../../services/motoristas'
-const handlers = handler.NewHandler({
-  MotoristasServices: MotoristasServices(db),
-})
 
-const route = express()
-route.use(express.json())
-const app = handlers(route)
-
-const setPayload = () => {
-  const id = Math.floor(new Date().getTime() / 1000)
-
-  const payload: IMotoristas = {
-    id,
-    key: 'motoristas',
-    nome: 'Marcus',
-    dataCriacao: new Date().toDateString(),
-  }
-  return payload
-}
-
+ 
 describe('Acitons Motoristas', () => {
+
+  const storagedb = {} as IDatabase
+  const db = database(storagedb)
+
+  const handlers = handler.NewHandler({
+    MotoristasServices: MotoristasServices(db),
+  })
+
+  const route = express()
+  route.use(express.json())
+  const app = handlers(route)
+
+  const setPayload = () => {
+    const id = Math.floor(new Date().getTime() / 1000)
+
+    const payload: IMotoristas = {
+      id,
+      key: 'motoristas',
+      nome: 'Marcus',
+      dataCriacao: new Date().toDateString(),
+    }
+    return payload
+  }
+
   it('POST Criar novo motoristas', (done) => {
     request(app)
       .post('/motoristas')
@@ -90,7 +93,7 @@ describe('Acitons Motoristas', () => {
         done()
       })
   })
-
+ 
   it('PUT Atualizar motorista byid', (done) => {
     const payload = setPayload()
 

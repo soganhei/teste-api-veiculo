@@ -22,14 +22,8 @@ const Find = (db: IDatabaseServices) => async (
 
   const search = FormatUrlParams(params || {})
 
-  const searchVeiculo = (
-    fn: (item: any) => string,
-    search: string,
-    item: IVeiculos
-  ) => fn(item).indexOf(search) !== -1
-  const items = veiculos.filter((item) =>
-    searchVeiculo(FormatUrlParams, search, item)
-  )
+  const searchVeiculo = ( fn: (item: any) => string, search: string ) => ( item: IVeiculos) => fn(item).indexOf(search) !== -1
+  const items = veiculos.filter(searchVeiculo(FormatUrlParams, search))
   return items
 }
 
@@ -117,9 +111,10 @@ const IsPlaca = (db: IDatabaseServices) => async (
 ): Promise<boolean> => {
   const veiculos: IVeiculos[] = await db.Find(KEY)
 
-  const isPlaca = (item: IVeiculos, placa: string) => item.placa === placa
-  return veiculos.some((item) => isPlaca(item, placa))
+  return veiculos.some(isPlaca(placa))
 }
+
+export const isPlaca = (placa:string) => (item: IVeiculos) => item.placa === placa
 
 export default (db: IDatabaseServices): IVeiculosServices => {
   return {

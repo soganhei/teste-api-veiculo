@@ -18,7 +18,7 @@ interface IKeyValue {
 const Find = (db: IDatabaseServices) => async (): Promise<ISaidas[]> => {
   const saidas: ISaidasForm[] = await db.Find(KEY)
   
-  const promises = saidas.map((item) => ListarSaidas(db)(item))
+  const promises = saidas.map(ListarSaidas(db))
 
   const items = await Promise.all(promises)
   return items

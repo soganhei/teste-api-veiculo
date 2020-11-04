@@ -1,9 +1,10 @@
 import database, { IDatabase } from './db'
 
-const storagedb = {} as IDatabase
-const db = database(storagedb)
-
 describe('Database key/value', () => {
+  
+  const storagedb = {} as IDatabase
+  const db = database(storagedb)
+
   it('Criar registro', async () => {
     const usuario = await db.Create({
       id: 1,

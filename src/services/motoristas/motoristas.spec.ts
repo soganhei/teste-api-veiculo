@@ -4,25 +4,27 @@ import errors from './errors'
 import { IMotoristas } from '../../schemas'
 
 import app, { KEY } from './'
-
-const storagedb = {} as IDatabase
-const db = database(storagedb)
-
-const Services = app(db)
-
-const setPyload = () => {
-  const id = Math.floor(new Date().getTime() / 1000)
-
-  const payload: IMotoristas = {
-    id,
-    key: KEY,
-    nome: 'Marcus',
-    dataCriacao: new Date().toString(),
-  }
-  return payload
-}
+ 
 
 describe('Motoristas', () => {
+
+  const storagedb = {} as IDatabase
+  const db = database(storagedb)
+
+  const Services = app(db)
+
+  const setPyload = () => {
+    const id = Math.floor(new Date().getTime() / 1000)
+
+    const payload: IMotoristas = {
+      id,
+      key: KEY,
+      nome: 'Marcus',
+      dataCriacao: new Date().toString(),
+    }
+    return payload
+  }
+
   it('Criar novo motorista', async () => {
     const payload = setPyload()
 
@@ -52,7 +54,7 @@ describe('Motoristas', () => {
     response = await Services.Find({ nome: 'Marcus' })
     expect(response.length).toBe(1)
   })
-
+  
   it('Listar motorista byid', async () => {
     const payload = setPyload()
 

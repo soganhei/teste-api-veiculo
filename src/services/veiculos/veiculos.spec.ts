@@ -2,33 +2,37 @@ import database, { IDatabase } from '../db'
 
 import app, { KEY } from './'
 import errors from './errors'
-import { IVeiculos } from '../../schemas'
-
-const storagedb = {} as IDatabase
-const db = database(storagedb)
-
-const Services = app(db)
-
-const setPayload = () => {
-  const id = Math.floor(new Date().getTime() / 1000)
-
-  const payload: IVeiculos = {
-    id,
-    key: KEY,
-    marca: 'BMW',
-    cor: 'Branca',
-    placa: 'XXX-XX2',
-    dataCriacao: new Date().toString(),
-  }
-  return payload
-}
+import { IVeiculos,IVeiculosServices } from '../../schemas'
+ 
 
 describe('Veículos', () => {
-  it('Criar novo veículo', async () => {
-    const payload = setPayload()
-    const response = await Services.Create(payload)
+
+  const storagedb = {} as IDatabase
+  const db = database(storagedb)
+
+  const Services = app(db)
+  
+  const setPayload = () => {
+    const id = Math.floor(new Date().getTime() / 1000)
+    const payload: IVeiculos = {
+      id,
+      key: KEY,
+      marca: 'BMW',
+      cor: 'Branca',
+      placa: 'XXX-XX2',
+      dataCriacao: new Date().toString(),
+    }
+    return payload
+  }
+  const payload = setPayload()
+  const Create = (services:IVeiculosServices,payload:IVeiculos) => async () =>{
+    
+    const response = await services.Create(payload)
     expect(response).toEqual(payload)
-  })
+
+  }
+
+  it('Criar novo veículo',Create(Services,payload))
 
   it('Listar Veículos', async () => {
     const response = await Services.Find()
