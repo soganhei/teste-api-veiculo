@@ -35,8 +35,8 @@ const FindByid = (db: IDatabaseServices) => async (
       response.idVeiculo
     )
     return Object.assign({}, response, {
-      motorista: motorista,
-      veiculo: veiculo,
+      motorista: {...motorista},
+      veiculo: {...veiculo},
     })
   } catch (error) {
     throw error
@@ -118,9 +118,7 @@ const Delete = (db: IDatabaseServices) => async (
   }
 }
 
-export const FormatDate = (key: string, value: string): IKeyValue => ({
-  [key]: FormatDatePtBr(value || ''),
-})
+export const FormatDate = () => (item:IKeyValue): IKeyValue => ({ [item[0]]: FormatDatePtBr(item[1] || ''),})
 
 export const ListarSaidas = (db: IDatabaseServices) => async (
   item: ISaidas | any  
@@ -130,13 +128,14 @@ export const ListarSaidas = (db: IDatabaseServices) => async (
     item.idMotorista,
     item.idVeiculo
   )
-  const veiculoMotorista = { veiculo: veiculo, motorista: motorista }
+  const veiculoMotorista = { veiculo: {...veiculo}, motorista: {...motorista} }
 
+  
   const date: IKeyValue = {}
   date['dataSaida'] = item.dataSaida
   date['dataEntrada'] = item.dataEntrada
-
-  const dates = Object.entries(date).map((item) => FormatDate(...item))
+   
+  const dates = Object.entries(date).map(FormatDate)
   return Object.assign({}, item, veiculoMotorista, ...dates)
 }
 
@@ -156,7 +155,7 @@ export const VMNaoCadastrado = (db: IDatabaseServices) => async (
     const items = { idMotorista, idVeiculo }
 
     return Object.values(items)
-      .map((id) => IsByid(db)(id))
+      .map(IsByid(db))
       .some((item) => !item)
   } catch (error) {
     throw error
@@ -171,24 +170,17 @@ export const SaidaCadastrada = (db: IDatabaseServices) => async (
   const items = { dataSaida, idMotorista, idVeiculo }
 
   return Object.entries(items)
-    .map((item) => ValidarSaidaCadastrada(db)(KEY, item[0], item[1]))
-    .some((item) => !item)
+  .map(ValidarSaidaCadastrada(db,KEY))
+  .some((item) => !item)
 }
 
-export const IsByid = (db: IDatabaseServices) => async (
-  id: number
-): Promise<boolean> => {
+export const IsByid = (db: IDatabaseServices) => async (id: number): Promise<boolean> => {
   const response = await db.Findbyid(id)
   return Object.values(response).length === 0
 }
 
-export const ValidarSaidaCadastrada = (db: IDatabaseServices) => async (
-  key: string,
-  column: string,
-  id: any
-): Promise<boolean> => {
-  return await db.ForenKey(id, key, column)
-}
+export const ValidarSaidaCadastrada = (db: IDatabaseServices,key:string) => async (item:any): Promise<boolean> =>  await db.ForenKey(item[1], key, item[0])
+
 
 export const ForeignKey = (db: IDatabaseServices) => async (
   idMotorista: number,
@@ -198,17 +190,15 @@ export const ForeignKey = (db: IDatabaseServices) => async (
   foreignKeys['motorista'] = idMotorista
   foreignKeys['veiculo'] = idVeiculo
 
-  const promises = Object.entries(foreignKeys).map((item) =>
-    ForeignKeyValue(db)(...item)
-  )
+  const promises = Object.entries(foreignKeys).map(ForeignKeyValue(db))
 
   const items = await Promise.all(promises)
   return Object.assign({}, ...items)
 }
-export const ForeignKeyValue = (db: IDatabaseServices) => async (
-  key: string,
-  value: number
-): Promise<IKeyValue> => ({ [key]: await db.Findbyid(value) })
+export const ForeignKeyValue = 
+(db: IDatabaseServices) => 
+async (item:IKeyValue): Promise<IKeyValue> => 
+({ [item[0]]: await db.Findbyid(item[1]) })
 
 export default (db: IDatabaseServices): ISaidasServices => {
   return {

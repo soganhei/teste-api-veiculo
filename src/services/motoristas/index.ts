@@ -20,14 +20,8 @@ const Find = (db: IDatabaseServices) => async (
 
   const paramsUrl = FormatUrlParams(params || {})
 
-  const searchNome = (
-    fn: (item: any) => string,
-    search: string,
-    item: IMotoristas
-  ) => fn(item).indexOf(search) !== -1
-  const items = motoristas.filter((item) =>
-    searchNome(FormatUrlParams, paramsUrl, item)
-  )
+  const searchNome = (fn: (item: any) => string, search: string) => (item: IMotoristas) => fn(item).indexOf(search) !== -1
+  const items = motoristas.filter(searchNome(FormatUrlParams, paramsUrl))
   return items
 }
 
@@ -109,8 +103,8 @@ const IsNome = (db: IDatabaseServices) => async (
 ): Promise<boolean> => {
   const motoristas: IMotoristas[] = await db.Find(KEY)
 
-  const isNome = (item: IMotoristas, nome: string) => item.nome === nome
-  return motoristas.some((item) => isNome(item, nome))
+  const isNome = (nome: string) => (item:IMotoristas) => item.nome === nome
+  return motoristas.some(isNome(nome))
 }
 
 export default (db: IDatabaseServices): IMotoristasServices => {
