@@ -5,7 +5,7 @@ const db = database(storagedb)
 
 describe('Database key/value', () => {
   it('Criar registro', async () => {
-    const usuario =  await db.Create({
+    const usuario = await db.Create({
       id: 1,
       nome: 'Marcus',
       key: 'teste',
@@ -16,8 +16,7 @@ describe('Database key/value', () => {
       nome: 'Antonio',
       key: 'teste',
     })
-    expect([usuario,usuario2]).toEqual([true,true])
-
+    expect([usuario, usuario2]).toEqual([true, true])
   })
 
   it('Listar registro', async () => {
@@ -60,8 +59,7 @@ describe('Database key/value', () => {
     expect(item.nome).toBe('Marcus Antonio')
   })
   it('Deletar registro', async () => {
-
-    const deletado =  await db.Delete(1)
+    const deletado = await db.Delete(1)
     expect(deletado).toBe(true)
 
     const items = await db.Find('teste')

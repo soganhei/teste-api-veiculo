@@ -19,9 +19,10 @@ const Create = (db: IDatabase) => async (payload: any): Promise<boolean> => {
 }
 
 const Find = (db: IDatabase) => async (key: string): Promise<any[]> => {
-  const keys = (item: any, key: string) => item.key === key
-  return Object.values(db).filter((item) => keys(item, key))
+  return Object.values(db).filter((item) => FindKeys(item, key))
 }
+
+export const FindKeys = (item: any, key: string) => item.key === key
 
 const Findbyid = (db: IDatabase) => async (id: number): Promise<any> => {
   const item = db[id]
@@ -53,10 +54,10 @@ const ForenKey = (db: IDatabase) => async (
   table: string,
   column: string
 ): Promise<boolean> => {
-  const isfk = (item: any, table: string, column: string, id: any) =>
-    item.key === table && item[column] === id
-  return Object.values(db).some((item) => isfk(item, table, column, id))
+  return Object.values(db).some((item) => isFK(item, table, column, id))
 }
+export const isFK = (item: any, table: string, column: string, id: any) =>
+  item.key === table && item[column] === id
 
 export const Storage = (): IDatabase => {
   return {} as IDatabase

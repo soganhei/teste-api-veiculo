@@ -26,9 +26,7 @@ const setPayload = () => {
 }
 
 describe('Saídas', () => {
- 
   it('Nova saída', async () => {
-    
     const payload = setPayload()
 
     db.Create({
@@ -46,17 +44,15 @@ describe('Saídas', () => {
   })
 
   it('Validar Veículo e Motorista não cadastrada', async () => {
-    
     const payload = setPayload()
- 
+
     try {
-        await Services.Create(payload)
+      await Services.Create(payload)
     } catch (error) {
       expect(error).toBe(errors.ErrorVMNaoCadastrado)
     }
-     
   })
- 
+
   it('Listar saídas', async () => {
     const response = await Services.Find()
     expect(response.length).toBe(1)
@@ -82,6 +78,5 @@ describe('Saídas', () => {
     } catch (error) {
       expect(error).toBe('Não encontrado')
     }
-  }) 
-
+  })
 })
