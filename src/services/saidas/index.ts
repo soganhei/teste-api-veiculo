@@ -34,7 +34,7 @@ const FindByid = (db: IDatabaseServices) => async (
       response.idMotorista,
       response.idVeiculo
     )
-    return Object.assign({}, response, {
+    return Object.assign({}, response, {      
       motorista: {...motorista},
       veiculo: {...veiculo},
     })
