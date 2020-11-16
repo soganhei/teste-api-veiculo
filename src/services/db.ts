@@ -1,6 +1,7 @@
 export interface IDatabase {
-  [index: number]: any
+   storage: Map<any, any>
 }
+ 
 
 export interface IDatabaseServices {
   Create(payload: any): Promise<boolean>
@@ -14,18 +15,20 @@ export interface IDatabaseServices {
 export const ErrorNovoRegistro = 'ErrorNovoRegistro'
 
 const Create = (db: IDatabase) => async (payload: any): Promise<boolean> => {
-  db[payload.id] = payload
-  return Object.is(db[payload.id], payload)
+  
+  db.storage.set(payload.id,payload)
+  return db.storage.has(payload.id)
+
 }
 
 const Find = (db: IDatabase) => async (key: string): Promise<any[]> => {
-  return Object.values(db).filter((item) => FindKeys(item, key))
+  return [...db.storage.values()].filter((item) => FindKeys(item, key))    
 }
 
 export const FindKeys = (item: any, key: string) => item.key === key
 
 const Findbyid = (db: IDatabase) => async (id: number): Promise<any> => {
-  const item = db[id]
+  const item = db.storage.get(id)
   if (item === undefined) {
     return Promise.reject('Não encontrado')
   }
@@ -36,14 +39,13 @@ const Update = (db: IDatabase) => async (
   id: number | any,
   value: any
 ): Promise<boolean> => {
-  db[id] = value
-  return Object.is(db[id], value)
+  db.storage.set(id,value)
+  return db.storage.has(id)
 }
 
 const Delete = (db: IDatabase) => async (id: number): Promise<boolean> => {
-  delete db[id]
-
-  if (db[id] !== undefined) {
+   
+  if (!db.storage.delete(id)) {
     return false
   }
   return true
@@ -59,18 +61,21 @@ const ForenKey = (db: IDatabase) => async (
 export const isFK = (item: any, table: string, column: string, id: any) =>
   item.key === table && item[column] === id
 
-export const Storage = (): IDatabase => {
-  return {} as IDatabase
+export const Storage = ():IDatabase => {
+  const db: IDatabase = {
+    storage: new Map(),
+  }
+  return db
 }
 
-export default (storage: IDatabase) => {
+export default (db: IDatabase) => {
   const services: IDatabaseServices = {
-    Create: Create(storage),
-    Find: Find(storage),
-    Findbyid: Findbyid(storage),
-    Update: Update(storage),
-    Delete: Delete(storage),
-    ForenKey: ForenKey(storage),
+    Create: Create(db),
+    Find: Find(db),
+    Findbyid: Findbyid(db),
+    Update: Update(db),
+    Delete: Delete(db),
+    ForenKey: ForenKey(db),
   }
   return services
 }
